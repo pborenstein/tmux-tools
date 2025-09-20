@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./original-tmux-status.sh:*)",
+      "Bash(./tmux-status.sh:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
