@@ -312,11 +312,11 @@ echo "TMUX STATUS $(date)"
 echo
 # Print headers based on show_pid flag
 if [ "$show_pid" = true ]; then
-  echo "session       win  name      p  cmd      w    pid    path"
-  echo "-------       ---  --------  -  -------  ---  -----  ----"
+  echo "  session       win  name      p  cmd      w    pid    path"
+  echo "- -------       ---  --------  -  -------  ---  -----  ----"
 else
-  echo "session       win  name      p  cmd      w"
-  echo "-------       ---  --------  -  -------  ---"
+  echo "  session       win  name      p  cmd      w"
+  echo "- -------       ---  --------  -  -------  ---"
 fi
 
 last_session=""
@@ -326,6 +326,9 @@ first_session=true
 # Get client width data for sessions
 # Store as simple text for lookup (bash 3 compatible)
 client_data=$(tmux list-clients -F '#{client_session} #{client_width}')
+
+# Get session attachment data
+session_data=$(tmux list-sessions -F '#{session_name} #{session_attached}')
 
 # Get pane data and handle empty case
 pane_data=$(tmux list-panes -a -F '#{session_name} #{window_index} #{window_name} #{pane_index} #{pane_pid} #{pane_current_command} #{pane_current_path}')
@@ -350,6 +353,19 @@ echo "$pane_data" | while read -r session win_index win_name pane_index pid cmd 
   window_display="$win_name"
   current_window="${session}:${win_index}"
 
+  # Get attachment indicator for this session (only show on first line of session)
+  attachment_indicator=""
+  if [ "$session" != "$last_session" ]; then
+    session_attached=$(echo "$session_data" | grep "^$session " | cut -d' ' -f2)
+    if [ "$session_attached" = "0" ]; then
+      attachment_indicator=" "
+    elif [ "$session_attached" = "1" ]; then
+      attachment_indicator="•"
+    else
+      attachment_indicator="$session_attached"
+    fi
+  fi
+
   if [ "$session" == "$last_session" ]; then
     session_display=""
   fi
@@ -361,16 +377,20 @@ echo "$pane_data" | while read -r session win_index win_name pane_index pid cmd 
   # Get client width for this session (only show on first line of session)
   width_display=""
   if [ "$session" != "$last_session" ]; then
-    # Look up width in client_data using grep
-    width_display=$(echo "$client_data" | grep "^$session " | cut -d' ' -f2)
+    # Get current client's width if we're in that session, otherwise use first client
+    if [ "$session" = "$(tmux display-message -p '#{session_name}' 2>/dev/null)" ]; then
+      width_display=$(tmux display-message -p '#{client_width}' 2>/dev/null)
+    else
+      width_display=$(echo "$client_data" | grep "^$session " | head -1 | cut -d' ' -f2)
+    fi
     width_display="${width_display:-"-"}"
   fi
 
   # Print output based on show_pid flag with tighter column widths
   if [ "$show_pid" = true ]; then
-    printf "%-13s %-3s  %-8s  %-1s  %-7s  %-3s  %-5s  %s\n" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$pid" "$path"
+    printf "%-1s %-13s %-3s  %-8s  %-1s  %-7s  %-3s  %-5s  %s\n" "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$pid" "$path"
   else
-    printf "%-13s %-3s  %-8s  %-1s  %-7s  %-3s\n" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display"
+    printf "%-1s %-13s %-3s  %-8s  %-1s  %-7s  %-3s\n" "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display"
   fi
 
   last_session="$session"
