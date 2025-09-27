@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(./original-tmux-status.sh:*)",
-      "Bash(./tmux-status.sh:*)"
+      "Bash(./tmux-status.sh:*)",
+      "Bash(./tmux-overview)",
+      "Bash(./tmux-overview:*)",
+      "Bash(git add:*)",
+      "Bash(tmux list-sessions:*)"
     ],
     "deny": [],
     "ask": []

@@ -23,8 +23,9 @@
 #   --no-rename         Skip all session renaming operations. Only display status.
 #                       This is the default behavior.
 #
-#   --rename-defaults   Rename sessions with default names (configured prefix)
-#                       to unused city names, then display status.
+#   --rename-auto       Rename sessions that are not city names and windows that
+#                       are not mammal names to unused names, then display status.
+#                       This combines session and window renaming in one command.
 #
 #   --rename-sessions   Rename ALL existing sessions to random city names.
 #
@@ -53,7 +54,7 @@
 # USAGE EXAMPLES:
 #   ./tmux-status.sh                    # Show compact status (default)
 #   ./tmux-status.sh --show-pid         # Show detailed status with PID and paths
-#   ./tmux-status.sh --rename-defaults  # Rename default-named sessions
+#   ./tmux-status.sh --rename-auto      # Rename non-city/non-mammal names
 #   ./tmux-status.sh --rename-sessions  # Rename all sessions to city names
 #   ./tmux-status.sh --rename-windows   # Rename all windows to mammal names
 #
@@ -107,7 +108,7 @@ USAGE:
 OPTIONS:
   --help, -h          Show this help message
   --no-rename         Skip all session renaming (default)
-  --rename-defaults   Rename sessions with default names to city names
+  --rename-auto       Rename non-city sessions and non-mammal windows (both)
   --rename-sessions   Rename ALL sessions to random city names
   --rename-windows    Rename all windows to random mammal names
   --show-pid          Show PID and path columns (hidden by default)
@@ -115,7 +116,7 @@ OPTIONS:
 EXAMPLES:
   ./tmux-status.sh                    # Show compact status
   ./tmux-status.sh --show-pid         # Show status with PID and path details
-  ./tmux-status.sh --rename-defaults  # Rename default-named sessions
+  ./tmux-status.sh --rename-auto      # Rename non-city/non-mammal names
   ./tmux-status.sh --rename-sessions  # Rename all sessions
   ./tmux-status.sh --rename-windows   # Rename all windows to mammals
 EOF
@@ -125,8 +126,9 @@ EOF
       no_rename=true
       shift
       ;;
-    --rename-defaults)
+    --rename-auto)
       no_rename=false
+      rename_windows=true
       shift
       ;;
     --rename-sessions)
@@ -151,7 +153,6 @@ EOF
 done
 
 # Configuration
-DEFAULT_PREFIX="shellfish-"
 
 # City names for renaming sessions (3-8 letters, lowercase)
 cities=(
@@ -209,12 +210,21 @@ if [ "$no_rename" = false ]; then
       session_count=$((session_count + 1))
     done
   else
-    # Original behavior: only rename sessions with configured prefix
+    # New behavior: rename sessions that are not in the city names list
     # Get all session names (including any that might already be city names)
     all_current_sessions=$(tmux list-sessions -F '#{session_name}')
 
     echo "$existing_sessions" | while read -r session; do
-      if [[ "$session" == ${DEFAULT_PREFIX}* ]]; then
+      # Check if session name is NOT in the cities array
+      session_is_city=false
+      for city in "${cities[@]}"; do
+        if [[ "$session" == "$city" ]]; then
+          session_is_city=true
+          break
+        fi
+      done
+
+      if [[ "$session_is_city" == false ]]; then
         # Find an unused city name (check against current session list)
         for city in "${cities[@]}"; do
           if ! echo "$all_current_sessions" | grep -q "^${city}$"; then
@@ -256,32 +266,44 @@ if [ "$rename_windows" = true ]; then
 
     mammal_index=0
     echo "$windows" | while read -r win_index win_name; do
-      # Find next available mammal name
-      while true; do
-        new_name=$(echo "$shuffled_mammals" | sed -n "$((mammal_index + 1))p")
-
-        # If we run out of mammals, cycle back to the beginning
-        if [ -z "$new_name" ]; then
-          mammal_index=0
-          new_name=$(echo "$shuffled_mammals" | sed -n "1p")
-        fi
-
-        # Check if this name is already used in this session
-        # grep -q is quiet mode; "^name$" anchors ensure exact match
-        if ! echo "$existing_names" | grep -q "^${new_name}$"; then
+      # Check if window name is already a valid mammal name
+      window_is_mammal=false
+      for mammal in "${mammals[@]}"; do
+        if [[ "$win_name" == "$mammal" ]]; then
+          window_is_mammal=true
           break
+        fi
+      done
+
+      # Only rename if window name is not already a mammal name
+      if [[ "$window_is_mammal" == false ]]; then
+        # Find next available mammal name
+        while true; do
+          new_name=$(echo "$shuffled_mammals" | sed -n "$((mammal_index + 1))p")
+
+          # If we run out of mammals, cycle back to the beginning
+          if [ -z "$new_name" ]; then
+            mammal_index=0
+            new_name=$(echo "$shuffled_mammals" | sed -n "1p")
+          fi
+
+          # Check if this name is already used in this session
+          # grep -q is quiet mode; "^name$" anchors ensure exact match
+          if ! echo "$existing_names" | grep -q "^${new_name}$"; then
+            break
+          fi
+
+          mammal_index=$((mammal_index + 1))
+        done
+
+        if [ "$new_name" != "$win_name" ]; then
+          if ! tmux rename-window -t "${session}:${win_index}" "$new_name"; then
+            echo "Warning: Failed to rename window '${session}:${win_index}' to '$new_name'" >&2
+          fi
         fi
 
         mammal_index=$((mammal_index + 1))
-      done
-
-      if [ "$new_name" != "$win_name" ]; then
-        if ! tmux rename-window -t "${session}:${win_index}" "$new_name"; then
-          echo "Warning: Failed to rename window '${session}:${win_index}' to '$new_name'" >&2
-        fi
       fi
-
-      mammal_index=$((mammal_index + 1))
     done
   done
 fi
