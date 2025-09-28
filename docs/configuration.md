@@ -2,7 +2,7 @@
 
 ## Overview
 
-tmux-tools uses YAML configuration files to customize behavior, themes, naming pools, and display options. Configuration files are optional - the system works with sensible defaults.
+tmux-tools uses YAML configuration files to customize display themes, naming pools, and formatting options for session inspection and renaming. Configuration files are optional - the system works with sensible defaults.
 
 ## Configuration File Locations
 

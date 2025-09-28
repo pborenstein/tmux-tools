@@ -1,6 +1,6 @@
 # tmux-tools
 
-A unified toolkit for tmux session management that provides session status displays, comprehensive overviews, and intelligent renaming capabilities through a single command interface.
+A tmux session inspector and naming utility that provides comprehensive status displays, detailed overviews, and intelligent session/window renaming through a unified command interface.
 
 ## Quick Start
 
@@ -19,13 +19,13 @@ chmod +x tmux-tools
 
 ## Overview
 
-tmux-tools combines the functionality of multiple tmux utilities into a single, modular system:
+tmux-tools provides comprehensive inspection and organization of existing tmux sessions:
 
-- **Session Status Display**: Tabular view of all sessions, windows, and panes
-- **Detailed Overview**: Tree-structured view with comprehensive session information
-- **Smart Renaming**: Intelligent renaming of sessions and windows with conflict resolution
-- **Configuration Management**: Customizable themes, naming pools, and display options
-- **JSON Output**: Machine-readable format for scripting and automation
+- **Session Status Display**: Tabular view of all sessions, windows, and panes with device identification
+- **Detailed Overview**: Tree-structured view with comprehensive session information and JSON export
+- **Smart Renaming**: Intelligent renaming of sessions and windows using configurable name pools
+- **Configuration Management**: Customizable themes, naming schemes, and display options
+- **Data Export**: Machine-readable JSON format for integration and automation
 
 ## Architecture
 
@@ -243,14 +243,14 @@ tmux-tools config show
 
 ## Development
 
-The modular architecture separates concerns:
+The modular architecture separates concerns for tmux data inspection and presentation:
 
-- **Core Functions** (`tmux_core.sh`): Direct tmux API interaction
-- **Display Logic** (`tmux_display.sh`): Formatting and presentation
-- **Color Management** (`tmux_colors.sh`): Terminal color handling
-- **Configuration** (`tmux_config.sh`): Settings and customization
+- **Core Functions** (`tmux_core.sh`): tmux server queries and data retrieval
+- **Display Logic** (`tmux_display.sh`): Status formatting and tree visualization
+- **Color Management** (`tmux_colors.sh`): Terminal themes and color schemes
+- **Configuration** (`tmux_config.sh`): Settings, naming pools, and customization
 
-The unified interface provides consistent command-line experience while maintaining separation between functional components.
+The unified interface provides consistent inspection and naming operations while maintaining separation between data access, presentation, and configuration.
 
 ## Documentation
 

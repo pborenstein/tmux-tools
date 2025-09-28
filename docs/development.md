@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers contributing to tmux-tools, including setup, architecture understanding, testing, and development workflows. Whether you're fixing bugs, adding features, or improving documentation, this guide will help you get started.
+This guide covers contributing to tmux-tools, a session inspection and naming utility for tmux. Whether you're fixing bugs, adding display features, improving naming algorithms, or enhancing documentation, this guide will help you get started.
 
 ## Quick Start for Contributors
 
@@ -215,11 +215,11 @@ set -euo pipefail
 
 ### Library Design Principles
 
-1. **Single Responsibility**: Each library file has one clear purpose
-2. **Dependency Injection**: Pass dependencies as parameters
+1. **Single Responsibility**: Each library focuses on one aspect (data queries, display, colors, config)
+2. **Read-Only Operations**: Libraries query tmux state without modifying sessions (except naming)
 3. **Error Propagation**: Consistent error handling and return codes
-4. **Configuration**: Use global variables set by config system
-5. **Testability**: Design functions to be easily unit tested
+4. **Configuration-Driven**: Use global variables set by config system
+5. **Testability**: Design functions for easy unit testing with mock tmux data
 
 ### Adding New Commands
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-tmux-tools provides multiple integration points for automation, scripting, and workflow optimization. This guide covers common integration patterns, automation examples, and best practices for incorporating tmux-tools into your development workflow.
+tmux-tools provides JSON export and scripting capabilities for integrating session inspection into automation workflows. This guide covers integration patterns, monitoring examples, and best practices for incorporating tmux session data into your development workflow.
 
 ## JSON API Integration
 
@@ -112,93 +112,97 @@ cleanup_old_sessions() {
 cleanup_old_sessions 7
 ```
 
-### Development Environment Setup
+### Session Discovery and Inspection
 
-**Automatically create development sessions:**
+**Inspect and organize existing development sessions:**
 
 ```bash
 #!/bin/bash
-# dev-setup.sh - Create standardized development environment
+# dev-inspect.sh - Inspect and organize development environment
 
-create_dev_session() {
-  local project_name="$1"
-  local project_path="$2"
+inspect_dev_sessions() {
+  local project_path="$1"
 
-  # Create session with project name
-  tmux new-session -d -s "$project_name" -c "$project_path"
+  echo "=== Development Session Inspector ==="
+  echo "Project path: $project_path"
+  echo
 
-  # Create windows for different purposes
-  tmux new-window -t "$project_name" -n "editor" -c "$project_path"
-  tmux new-window -t "$project_name" -n "server" -c "$project_path"
-  tmux new-window -t "$project_name" -n "tests" -c "$project_path"
-  tmux new-window -t "$project_name" -n "logs" -c "$project_path"
+  # Show current session status
+  echo "Current tmux sessions:"
+  ./tmux-tools status
+  echo
 
-  # Send commands to specific windows
-  tmux send-keys -t "$project_name:editor" "nvim ." Enter
-  tmux send-keys -t "$project_name:server" "npm run dev" Enter
-  tmux send-keys -t "$project_name:tests" "npm run test:watch" Enter
-  tmux send-keys -t "$project_name:logs" "tail -f logs/app.log" Enter
+  # Analyze session distribution
+  echo "Session analysis:"
+  ./tmux-tools overview --json | jq -r '
+    "Total sessions: " + (.sessions | length | tostring),
+    "Attached sessions: " + ([.sessions[] | select(.attached == true)] | length | tostring),
+    "Average windows per session: " + ([.sessions[].windows | length] | add / length | tostring)
+  '
+  echo
 
-  # Use tmux-tools to rename with consistent naming
-  tmux-tools rename auto
+  # Apply consistent naming to existing sessions
+  echo "Applying consistent naming..."
+  ./tmux-tools rename auto
 
-  # Show status
-  tmux-tools status
+  # Show final organized state
+  echo "Organized sessions:"
+  ./tmux-tools overview
 }
 
-# Usage: ./dev-setup.sh myproject ~/projects/myproject
-create_dev_session "$1" "$2"
+# Usage: ./dev-inspect.sh ~/projects/myproject
+inspect_dev_sessions "$1"
 ```
 
-### Session Backup and Restore
+### Session State Documentation
 
-**Backup and restore session configurations:**
+**Document and analyze session configurations:**
 
 ```bash
 #!/bin/bash
-# session-backup.sh - Backup/restore session state
+# session-documentation.sh - Document session state and structure
 
-backup_sessions() {
-  local backup_file="${1:-tmux-sessions-$(date +%Y%m%d-%H%M%S).json}"
+document_sessions() {
+  local output_file="${1:-tmux-session-report-$(date +%Y%m%d-%H%M%S).json}"
 
-  # Create comprehensive backup
+  # Create comprehensive documentation
   {
     echo "{"
     echo "  \"timestamp\": \"$(date -Iseconds)\","
     echo "  \"hostname\": \"$(hostname)\","
     echo "  \"sessions\": $(tmux-tools overview --json | jq '.sessions')"
     echo "}"
-  } > "$backup_file"
+  } > "$output_file"
 
-  echo "Sessions backed up to: $backup_file"
+  echo "Session state documented: $output_file"
 }
 
-restore_sessions() {
-  local backup_file="$1"
+analyze_session_patterns() {
+  local json_data
+  json_data=$(./tmux-tools overview --json)
 
-  if [[ ! -f "$backup_file" ]]; then
-    echo "Backup file not found: $backup_file"
-    return 1
-  fi
+  echo "=== Session Pattern Analysis ==="
 
-  # Parse backup and recreate sessions
-  jq -r '.sessions[] |
-    "tmux new-session -d -s \(.name); " +
-    (.windows[] | "tmux new-window -t \(.session):\(.index) -n \(.name); ") +
-    "echo \"Restored session: \(.name)\""
-  ' "$backup_file" | bash
+  # Window naming patterns
+  echo "Common window names:"
+  echo "$json_data" | jq -r '.sessions[].windows[].name' | sort | uniq -c | sort -nr | head -10
 
-  # Apply naming
-  tmux-tools rename auto
+  # Session activity patterns
+  echo "Session attachment patterns:"
+  echo "$json_data" | jq -r '.sessions[] | "\(.name): \(if .attached then "attached" else "detached" end)"'
+
+  # Window distribution
+  echo "Window count distribution:"
+  echo "$json_data" | jq -r '.sessions[] | "\(.name): \(.windows | length) windows"' | sort -k2 -nr
 }
 
 # Usage:
-# ./session-backup.sh backup
-# ./session-backup.sh restore backup-file.json
+# ./session-documentation.sh document
+# ./session-documentation.sh analyze
 case "$1" in
-  backup) backup_sessions "$2" ;;
-  restore) restore_sessions "$2" ;;
-  *) echo "Usage: $0 {backup|restore} [file]" ;;
+  document) document_sessions "$2" ;;
+  analyze) analyze_session_patterns ;;
+  *) echo "Usage: $0 {document|analyze} [file]" ;;
 esac
 ```
 

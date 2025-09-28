@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides practical examples for everyday tmux-tools usage, from simple session management to advanced workflows.
+This guide provides practical examples for everyday tmux-tools usage, from simple session inspection to organizing and monitoring tmux environments.
 
 ## Getting Started
 
@@ -28,22 +28,23 @@ session       win  name      p  cmd      w
 development   0    fish      0  fish     142
 ```
 
-### Basic Session Management
+### Basic Session Inspection and Organization
 
-**Create and rename sessions:**
+**Inspect and organize existing sessions:**
 ```bash
-# Create multiple sessions
-tmux new-session -d -s project1
-tmux new-session -d -s project2
-tmux new-session -d -s testing
-
-# Show current status
+# Check what tmux sessions are running
 ./tmux-tools status
 
-# Rename sessions to cities
+# Get detailed view of all sessions
+./tmux-tools overview
+
+# Apply consistent naming to sessions with default names
+./tmux-tools rename auto
+
+# Rename all sessions to cities for better organization
 ./tmux-tools rename sessions
 
-# Check the results
+# Check the organized results
 ./tmux-tools status
 ```
 
@@ -58,37 +59,38 @@ berlin        0    fish      0  fish     142
 
 ## Daily Workflow Examples
 
-### Development Session Setup
+### Development Session Organization
 
-**Create a complete development environment:**
+**Organize and monitor your development environment:**
 
 ```bash
 #!/bin/bash
-# dev-setup.sh - Create standardized development session
+# dev-organize.sh - Organize existing development sessions
 
-PROJECT_NAME="myapp"
 PROJECT_PATH="$HOME/projects/myapp"
 
-# Create main session
-tmux new-session -d -s "$PROJECT_NAME" -c "$PROJECT_PATH"
+echo "=== Development Session Organization ==="
 
-# Create development windows
-tmux new-window -t "$PROJECT_NAME" -n "editor" -c "$PROJECT_PATH"
-tmux new-window -t "$PROJECT_NAME" -n "server" -c "$PROJECT_PATH"
-tmux new-window -t "$PROJECT_NAME" -n "tests" -c "$PROJECT_PATH"
-tmux new-window -t "$PROJECT_NAME" -n "logs" -c "$PROJECT_PATH"
+# Show current session state
+echo "Current tmux environment:"
+./tmux-tools status
+echo
 
-# Start applications in each window
-tmux send-keys -t "$PROJECT_NAME:editor" "nvim ." Enter
-tmux send-keys -t "$PROJECT_NAME:server" "npm run dev" Enter
-tmux send-keys -t "$PROJECT_NAME:tests" "npm run test:watch" Enter
-tmux send-keys -t "$PROJECT_NAME:logs" "tail -f logs/app.log" Enter
-
-# Apply consistent naming
+# Apply smart renaming to clean up session names
+echo "Applying consistent naming..."
 ./tmux-tools rename auto
+echo
 
-# Show the setup
+# Show organized state
+echo "Organized sessions:"
 ./tmux-tools overview --detailed
+echo
+
+# Monitor specific session if it exists
+if tmux has-session -t myapp 2>/dev/null; then
+  echo "Detailed view of myapp session:"
+  ./tmux-tools overview --session myapp
+fi
 ```
 
 ### Quick Status Checks
@@ -106,45 +108,49 @@ tmux send-keys -t "$PROJECT_NAME:logs" "tail -f logs/app.log" Enter
 ./tmux-tools overview --session oslo
 ```
 
-### Session Cleanup
+### Session Analysis
 
-**Daily cleanup routine:**
+**Analyze your tmux usage patterns:**
 
 ```bash
-# Show what's running
+# Show comprehensive session overview
 ./tmux-tools overview
 
-# Kill specific sessions
-tmux kill-session -t oslo
-tmux kill-session -t milan
+# Export session data for analysis
+./tmux-tools overview --json > sessions.json
 
-# Or kill all sessions
-tmux kill-server
+# Analyze common patterns
+cat sessions.json | jq -r '
+  .sessions[] |
+  "Session: \(.name) | Windows: \(.windows | length) | Status: \(if .attached then "attached" else "detached" end)"
+'
 
-# Verify cleanup
-./tmux-tools status
+# Find busiest sessions
+cat sessions.json | jq -r '
+  .sessions[] |
+  select((.windows | length) > 2) |
+  "\(.name): \(.windows | length) windows"
+'
 ```
 
 ## Window Management Examples
 
-### Multi-Window Workflows
+### Multi-Window Inspection
 
-**Development workflow with multiple windows:**
+**Inspect and organize sessions with multiple windows:**
 
 ```bash
-# Create session with multiple windows
-tmux new-session -d -s webdev
+# Assume you have an existing session with multiple windows
+# Check current window organization
+./tmux-tools status
 
-# Add windows for different purposes
-tmux new-window -t webdev -n "frontend"
-tmux new-window -t webdev -n "backend"
-tmux new-window -t webdev -n "database"
-tmux new-window -t webdev -n "monitoring"
+# Get detailed view of specific session
+./tmux-tools overview --session webdev
 
-# Rename windows with animal names
+# Rename windows with consistent animal names for better organization
 ./tmux-tools rename windows
 
-# Check the result
+# Check the organized result
 ./tmux-tools status
 ```
 

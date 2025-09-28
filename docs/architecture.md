@@ -2,7 +2,7 @@
 
 ## Overview
 
-tmux-tools is a modular tmux session management toolkit built on a unified command interface with pluggable library components. The architecture separates concerns between user interface, business logic, data access, and configuration management.
+tmux-tools is a modular tmux session inspection and naming toolkit built on a unified command interface with pluggable library components. The architecture separates concerns between user interface, data presentation, tmux server queries, and configuration management.
 
 ## System Architecture
 
@@ -73,8 +73,8 @@ cmd_config()             # Configuration management
 
 ### 2. Library Layer
 
-#### `lib/tmux_core.sh` - Data Access Layer
-**Purpose**: Core tmux API interactions and data retrieval
+#### `lib/tmux_core.sh` - Data Query Layer
+**Purpose**: tmux server queries and session data retrieval
 
 **Key Functions**:
 | Function | Purpose | Returns |
@@ -85,8 +85,8 @@ cmd_config()             # Configuration management
 | `get_window_data()` | Retrieve window information | formatted window data |
 | `get_pane_data()` | Retrieve pane information | formatted pane data |
 | `get_client_data()` | Retrieve client connection info | client data |
-| `rename_session()` | Safe session renaming | exit code |
-| `rename_window()` | Safe window renaming | exit code |
+| `rename_session()` | Apply new session names | exit code |
+| `rename_window()` | Apply new window names | exit code |
 
 **Data Formats**:
 ```bash
@@ -169,15 +169,15 @@ themes = {
 
 ## Data Flow Architecture
 
-### Status Display Flow
+### Status Inspection Flow
 ```
 User Command → tmux-tools → cmd_status() → tmux-status.sh
      ↓
-tmux_core.sh (get_session_data, get_window_data, get_pane_data)
+tmux_core.sh (query tmux server for session/window/pane data)
      ↓
-tmux_display.sh (format_session_display, print_status_row)
+tmux_display.sh (format data into tabular display)
      ↓
-tmux_colors.sh (colorize_session, get_color)
+tmux_colors.sh (apply color themes)
      ↓
 Terminal Output
 ```
