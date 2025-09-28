@@ -1,0 +1,280 @@
+#!/bin/bash
+
+#=============================================================================
+# tmux-tools - Unified command interface for tmux tools
+#=============================================================================
+#
+# PURPOSE:
+#   Single entry point for all tmux-tools operations, providing a consistent
+#   interface and command-line experience.
+#
+# FUNCTIONALITY:
+#   - tmux-tools status              # Current tmux-status.sh
+#   - tmux-tools overview           # Current tmux-overview
+#   - tmux-tools rename --auto      # Smart renaming
+#   - tmux-tools config             # Configuration management
+#   - tmux-tools help              # Help and documentation
+#
+# USAGE EXAMPLES:
+#   tmux-tools status                    # Show compact status
+#   tmux-tools status --show-pid         # Show detailed status
+#   tmux-tools overview --detailed       # Show detailed overview
+#   tmux-tools overview --json           # JSON output
+#   tmux-tools rename sessions          # Rename all sessions
+#   tmux-tools rename windows           # Rename all windows
+#   tmux-tools rename --auto             # Smart auto-rename
+#   tmux-tools config show              # Show current configuration
+#   tmux-tools config create             # Create example config file
+#   tmux-tools help                      # Show help
+#
+#=============================================================================
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source shared libraries
+source "$SCRIPT_DIR/lib/tmux_core.sh"
+source "$SCRIPT_DIR/lib/tmux_display.sh"
+source "$SCRIPT_DIR/lib/tmux_colors.sh"
+source "$SCRIPT_DIR/lib/tmux_config.sh"
+
+# Version information
+VERSION="1.0.0"
+
+# Show main help
+show_main_help() {
+  cat << EOF
+tmux-tools - Unified interface for tmux session management tools
+
+USAGE:
+    tmux-tools <command> [options]
+
+COMMANDS:
+    status          Show tmux session status in tabular format
+    overview        Show comprehensive session overview
+    rename          Rename sessions and windows
+    config          Manage configuration settings
+    help            Show help information
+    version         Show version information
+
+EXAMPLES:
+    tmux-tools status                    # Show compact status
+    tmux-tools status --show-pid         # Show detailed status with PIDs
+    tmux-tools overview --detailed       # Show detailed overview
+    tmux-tools overview --json           # Output in JSON format
+    tmux-tools rename sessions          # Rename all sessions
+    tmux-tools rename --auto             # Smart auto-rename
+    tmux-tools config show              # Show current configuration
+    tmux-tools config create            # Create example config file
+
+Use 'tmux-tools <command> --help' for more information on a specific command.
+EOF
+}
+
+# Show version information
+show_version() {
+  echo "tmux-tools version $VERSION"
+}
+
+# Status command (delegates to tmux-status.sh)
+cmd_status() {
+  exec "$SCRIPT_DIR/tmux-status.sh" "$@"
+}
+
+# Overview command (delegates to tmux-overview)
+cmd_overview() {
+  exec "$SCRIPT_DIR/tmux-overview" "$@"
+}
+
+# Rename command
+cmd_rename() {
+  local subcommand="$1"
+  shift
+
+  case "$subcommand" in
+    sessions)
+      exec "$SCRIPT_DIR/tmux-status.sh" --rename-sessions "$@"
+      ;;
+    windows)
+      exec "$SCRIPT_DIR/tmux-status.sh" --rename-windows "$@"
+      ;;
+    --auto|auto)
+      exec "$SCRIPT_DIR/tmux-status.sh" --rename-auto "$@"
+      ;;
+    --help|-h|help)
+      cat << EOF
+tmux-tools rename - Rename sessions and windows
+
+USAGE:
+    tmux-tools rename <subcommand> [options]
+
+SUBCOMMANDS:
+    sessions        Rename ALL sessions to city names
+    windows         Rename ALL windows to mammal names
+    auto, --auto    Smart rename: only rename non-standard names
+
+EXAMPLES:
+    tmux-tools rename sessions      # Rename all sessions to cities
+    tmux-tools rename windows       # Rename all windows to mammals
+    tmux-tools rename auto          # Smart rename non-standard names
+
+The rename command uses the naming pools configured in your
+tmux-tools configuration file (~/.tmux-tools.yaml).
+EOF
+      ;;
+    *)
+      echo "Error: Unknown rename subcommand '$subcommand'" >&2
+      echo "Use 'tmux-tools rename --help' for usage information" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# Config command
+cmd_config() {
+  local subcommand="$1"
+  shift
+
+  case "$subcommand" in
+    show)
+      # Load and display current configuration
+      load_config
+
+      echo "tmux-tools Configuration"
+      echo "========================"
+      echo
+      echo "Configuration file: $(find_config_file || echo "Not found")"
+      echo
+      echo "Current settings:"
+      echo "  Theme: $(get_config_value "theme")"
+      echo "  Session pool: $(get_config_value "session_pool")"
+      echo "  Window pool: $(get_config_value "window_pool")"
+      echo "  Attachment indicator: $(get_config_value "attachment_indicator")"
+      echo "  Default format: $(get_config_value "default_format")"
+      echo "  Show timestamps: $(get_config_value "show_timestamps")"
+      echo "  Group sessions: $(get_config_value "group_sessions")"
+      echo
+      echo "Available session names:"
+      get_session_names | sed 's/^/  /'
+      echo
+      echo "Available window names:"
+      get_window_names | sed 's/^/  /'
+      ;;
+    create)
+      local config_file="$HOME/.tmux-tools.yaml"
+      if [[ -f "$config_file" ]]; then
+        echo "Configuration file already exists at $config_file"
+        echo "Remove it first if you want to create a new one."
+        exit 1
+      fi
+
+      create_example_config "$config_file"
+      echo "Example configuration file created at $config_file"
+      echo "Edit this file to customize your tmux-tools settings."
+      ;;
+    edit)
+      local config_file
+      config_file=$(find_config_file)
+      if [[ -z "$config_file" ]]; then
+        echo "No configuration file found. Use 'tmux-tools config create' first."
+        exit 1
+      fi
+
+      local editor="${EDITOR:-vim}"
+      exec "$editor" "$config_file"
+      ;;
+    --help|-h|help)
+      cat << EOF
+tmux-tools config - Manage configuration settings
+
+USAGE:
+    tmux-tools config <subcommand>
+
+SUBCOMMANDS:
+    show            Show current configuration settings
+    create          Create an example configuration file
+    edit            Edit the configuration file
+
+EXAMPLES:
+    tmux-tools config show          # Show current settings
+    tmux-tools config create        # Create ~/.tmux-tools.yaml
+    tmux-tools config edit          # Edit configuration file
+
+Configuration files are searched in this order:
+  ~/.tmux-tools.yaml
+  ~/.tmux-tools.yml
+  ~/.config/tmux-tools/config.yaml
+  ~/.config/tmux-tools/config.yml
+  ./tmux-tools.yaml
+  ./tmux-tools.yml
+EOF
+      ;;
+    *)
+      echo "Error: Unknown config subcommand '$subcommand'" >&2
+      echo "Use 'tmux-tools config --help' for usage information" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# Help command
+cmd_help() {
+  local topic="$1"
+
+  case "$topic" in
+    status)
+      exec "$SCRIPT_DIR/tmux-status.sh" --help
+      ;;
+    overview)
+      exec "$SCRIPT_DIR/tmux-overview" --help
+      ;;
+    rename)
+      cmd_rename --help
+      ;;
+    config)
+      cmd_config --help
+      ;;
+    *)
+      show_main_help
+      ;;
+  esac
+}
+
+# Main command dispatcher
+main() {
+  if [[ $# -eq 0 ]]; then
+    show_main_help
+    exit 0
+  fi
+
+  local command="$1"
+  shift
+
+  case "$command" in
+    status)
+      cmd_status "$@"
+      ;;
+    overview)
+      cmd_overview "$@"
+      ;;
+    rename)
+      cmd_rename "$@"
+      ;;
+    config)
+      cmd_config "$@"
+      ;;
+    help|--help|-h)
+      cmd_help "$@"
+      ;;
+    version|--version|-v)
+      show_version
+      ;;
+    *)
+      echo "Error: Unknown command '$command'" >&2
+      echo "Use 'tmux-tools help' for usage information" >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

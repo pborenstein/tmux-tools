@@ -79,27 +79,23 @@
 #
 #=============================================================================
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Check if tmux is available
+if ! command -v tmux >/dev/null 2>&1; then
+  echo "Error: tmux is not installed or not in PATH" >&2
+  exit 1
+fi
 
-# Source shared libraries
-source "$SCRIPT_DIR/lib/tmux_core.sh"
-source "$SCRIPT_DIR/lib/tmux_display.sh"
-source "$SCRIPT_DIR/lib/tmux_colors.sh"
-source "$SCRIPT_DIR/lib/tmux_config.sh"
-
-# Load configuration
-load_config
-
-# Initialize colors based on configuration
-init_colors "$(get_config_value "theme")"
+# Check if tmux server is running
+if ! tmux list-sessions >/dev/null 2>&1; then
+  echo "No tmux sessions found (tmux server may not be running)" >&2
+  exit 0
+fi
 
 # Parse arguments
 no_rename=true  # Default: no renaming
 rename_sessions=false
 rename_windows=false
 show_pid=false
-
 while [[ $# -gt 0 ]]; do
   case $1 in
     --help|-h)
@@ -156,40 +152,28 @@ EOF
   esac
 done
 
-# Check tmux availability and status
-if ! check_tmux_available; then
-  exit 1
-fi
+# Configuration
 
-if ! check_tmux_running; then
-  exit 0
-fi
+# City names for renaming sessions (3-8 letters, lowercase)
+cities=(
+  "rio" "oslo" "lima" "bern"
+  "cairo" "tokyo" "paris"
+  "milan" "berlin" "sydney"
+  "boston" "madrid"
+)
 
-# Get available name pools from configuration
-# Use mapfile if available, otherwise use while loop for compatibility
-if command -v mapfile >/dev/null 2>&1; then
-  mapfile -t session_names < <(get_session_names)
-  mapfile -t window_names < <(get_window_names)
-elif command -v readarray >/dev/null 2>&1; then
-  readarray -t session_names < <(get_session_names)
-  readarray -t window_names < <(get_window_names)
-else
-  # Fallback for older bash versions
-  session_names=()
-  while IFS= read -r line; do
-    session_names+=("$line")
-  done < <(get_session_names)
-
-  window_names=()
-  while IFS= read -r line; do
-    window_names+=("$line")
-  done < <(get_window_names)
-fi
+# Mammal names for window renaming (3-8 letters, lowercase)
+mammals=(
+  "cat" "dog" "fox" "bat"
+  "elk" "bear" "lion"
+  "wolf" "seal" "deer"
+  "otter" "mouse"
+)
 
 # Handle renaming based on flags
 if [ "$no_rename" = false ]; then
   # Get all existing session names
-  existing_sessions=$(get_session_data "#{session_name}")
+  existing_sessions=$(tmux list-sessions -F '#{session_name}')
   if [ $? -ne 0 ]; then
     echo "Error: Failed to get tmux session list" >&2
     exit 1
@@ -197,25 +181,29 @@ if [ "$no_rename" = false ]; then
 
   if [ "$rename_sessions" = true ]; then
     # Rename ALL sessions to unique city names
-    shuffled_cities=("${session_names[@]}")
+    # Create a shuffled copy of cities array: "${cities[@]}" expands all array elements
+    shuffled_cities=("${cities[@]}")
 
     # Simple shuffle using sort -R (BSD compatible)
+    # printf '%s\n' prints each array element on separate line for sort -R to shuffle
     city_list=$(printf '%s\n' "${shuffled_cities[@]}" | sort -R)
 
     session_count=0
     echo "$existing_sessions" | while read -r session; do
       # Get the next available city name
+      # sed -n "Np" prints only line N; $((expr)) does arithmetic expansion
       new_name=$(echo "$city_list" | sed -n "$((session_count + 1))p")
 
       # If we run out of city names, add numbers to the last city
       if [ -z "$new_name" ]; then
         last_city=$(echo "$city_list" | tail -1)
-        overflow=$((session_count - ${#session_names[@]} + 1))
+        # ${#cities[@]} expands to the number of elements in cities array
+        overflow=$((session_count - ${#cities[@]} + 1))
         new_name="${last_city}${overflow}"
       fi
 
       if [ "$new_name" != "$session" ]; then
-        if ! rename_session "$session" "$new_name"; then
+        if ! tmux rename-session -t "$session" "$new_name"; then
           echo "Warning: Failed to rename session '$session' to '$new_name'" >&2
         fi
       fi
@@ -223,24 +211,25 @@ if [ "$no_rename" = false ]; then
     done
   else
     # New behavior: rename sessions that are not in the city names list
-    all_current_sessions=$(get_session_data "#{session_name}")
+    # Get all session names (including any that might already be city names)
+    all_current_sessions=$(tmux list-sessions -F '#{session_name}')
 
     echo "$existing_sessions" | while read -r session; do
-      # Check if session name is NOT in the session names array
-      session_is_valid=false
-      for valid_name in "${session_names[@]}"; do
-        if [[ "$session" == "$valid_name" ]]; then
-          session_is_valid=true
+      # Check if session name is NOT in the cities array
+      session_is_city=false
+      for city in "${cities[@]}"; do
+        if [[ "$session" == "$city" ]]; then
+          session_is_city=true
           break
         fi
       done
 
-      if [[ "$session_is_valid" == false ]]; then
-        # Find an unused session name
-        for name in "${session_names[@]}"; do
-          if ! echo "$all_current_sessions" | grep -q "^${name}$"; then
-            if ! rename_session "$session" "$name"; then
-              echo "Warning: Failed to rename session '$session' to '$name'" >&2
+      if [[ "$session_is_city" == false ]]; then
+        # Find an unused city name (check against current session list)
+        for city in "${cities[@]}"; do
+          if ! echo "$all_current_sessions" | grep -q "^${city}$"; then
+            if ! tmux rename-session -t "$session" "$city"; then
+              echo "Warning: Failed to rename session '$session' to '$city'" >&2
             fi
             break
           fi
@@ -253,7 +242,7 @@ fi
 # Handle window renaming
 if [ "$rename_windows" = true ]; then
   # Get all sessions
-  sessions=$(get_session_data "#{session_name}")
+  sessions=$(tmux list-sessions -F '#{session_name}')
   if [ $? -ne 0 ]; then
     echo "Error: Failed to get tmux session list for window renaming" >&2
     exit 1
@@ -261,76 +250,88 @@ if [ "$rename_windows" = true ]; then
 
   echo "$sessions" | while read -r session; do
     # Get windows for this session
-    windows=$(get_window_data "$session" "#{window_index} #{window_name}")
+    windows=$(tmux list-windows -t "$session" -F '#{window_index} #{window_name}')
     if [ $? -ne 0 ]; then
       echo "Warning: Failed to get windows for session '$session'" >&2
       continue
     fi
 
-    # Create a shuffled copy of window names array for this session
-    shuffled_windows=$(printf '%s\n' "${window_names[@]}" | sort -R)
+    # Create a shuffled copy of mammals array for this session
+    # Same pattern as cities: expand array elements and shuffle with sort -R
+    shuffled_mammals=$(printf '%s\n' "${mammals[@]}" | sort -R)
 
     # Get existing window names in this session to avoid conflicts
+    # cut -d' ' -f2- splits on space, takes from field 2 to end (window names)
     existing_names=$(echo "$windows" | cut -d' ' -f2-)
 
-    window_index=0
+    mammal_index=0
     echo "$windows" | while read -r win_index win_name; do
-      # Check if window name is already a valid window name
-      window_is_valid=false
-      for valid_name in "${window_names[@]}"; do
-        if [[ "$win_name" == "$valid_name" ]]; then
-          window_is_valid=true
+      # Check if window name is already a valid mammal name
+      window_is_mammal=false
+      for mammal in "${mammals[@]}"; do
+        if [[ "$win_name" == "$mammal" ]]; then
+          window_is_mammal=true
           break
         fi
       done
 
-      # Only rename if window name is not already valid
-      if [[ "$window_is_valid" == false ]]; then
-        # Find next available window name
+      # Only rename if window name is not already a mammal name
+      if [[ "$window_is_mammal" == false ]]; then
+        # Find next available mammal name
         while true; do
-          new_name=$(echo "$shuffled_windows" | sed -n "$((window_index + 1))p")
+          new_name=$(echo "$shuffled_mammals" | sed -n "$((mammal_index + 1))p")
 
-          # If we run out of names, cycle back to the beginning
+          # If we run out of mammals, cycle back to the beginning
           if [ -z "$new_name" ]; then
-            window_index=0
-            new_name=$(echo "$shuffled_windows" | sed -n "1p")
+            mammal_index=0
+            new_name=$(echo "$shuffled_mammals" | sed -n "1p")
           fi
 
           # Check if this name is already used in this session
+          # grep -q is quiet mode; "^name$" anchors ensure exact match
           if ! echo "$existing_names" | grep -q "^${new_name}$"; then
             break
           fi
 
-          window_index=$((window_index + 1))
+          mammal_index=$((mammal_index + 1))
         done
 
         if [ "$new_name" != "$win_name" ]; then
-          if ! rename_window "$session" "$win_index" "$new_name"; then
+          if ! tmux rename-window -t "${session}:${win_index}" "$new_name"; then
             echo "Warning: Failed to rename window '${session}:${win_index}' to '$new_name'" >&2
           fi
         fi
 
-        window_index=$((window_index + 1))
+        mammal_index=$((mammal_index + 1))
       fi
     done
   done
 fi
 
-# Print header
-print_status_header "$show_pid"
+echo "TMUX STATUS $(date)"
+echo
+# Print headers based on show_pid flag
+if [ "$show_pid" = true ]; then
+  echo "  session       win  name      p  cmd      w    pid    path"
+  echo "- -------       ---  --------  -  -------  ---  -----  ----"
+else
+  echo "  session       win  name      p  cmd      w"
+  echo "- -------       ---  --------  -  -------  ---"
+fi
 
 last_session=""
 last_window=""
 first_session=true
 
 # Get client width data for sessions
-client_data=$(get_client_data)
+# Store as simple text for lookup (bash 3 compatible)
+client_data=$(tmux list-clients -F '#{client_session} #{client_width}')
 
 # Get session attachment data
-session_data=$(get_session_data "#{session_name} #{session_attached}")
+session_data=$(tmux list-sessions -F '#{session_name} #{session_attached}')
 
 # Get pane data and handle empty case
-pane_data=$(get_pane_data "" "#{session_name} #{window_index} #{window_name} #{pane_index} #{pane_pid} #{pane_current_command} #{pane_current_path}")
+pane_data=$(tmux list-panes -a -F '#{session_name} #{window_index} #{window_name} #{pane_index} #{pane_pid} #{pane_current_command} #{pane_current_path}')
 if [ $? -ne 0 ]; then
   echo "Error: Failed to get tmux pane information" >&2
   exit 1
@@ -342,35 +343,54 @@ if [ -z "$pane_data" ]; then
 fi
 
 echo "$pane_data" | while read -r session win_index win_name pane_index pid cmd path; do
-  # Check if we need a session separator
-  if needs_session_separator "$session" "$last_session" "$first_session"; then
+  if [ "$first_session" = false ] && [ "$session" != "$last_session" ]; then
     echo
   fi
   first_session=false
 
-  # Format display elements
-  session_display=$(format_session_display "$session" "$last_session")
-  window_display=$(format_window_display "$session" "$win_index" "$win_name" "$last_window")
+  # Determine what to show in session and window name columns
+  session_display="$session"
+  window_display="$win_name"
   current_window="${session}:${win_index}"
 
   # Get attachment indicator for this session (only show on first line of session)
   attachment_indicator=""
   if [ "$session" != "$last_session" ]; then
     session_attached=$(echo "$session_data" | grep "^$session " | cut -d' ' -f2)
-    if [ -z "$session_attached" ]; then
-      session_attached="0"
+    if [ "$session_attached" = "0" ]; then
+      attachment_indicator=" "
+    elif [ "$session_attached" = "1" ]; then
+      attachment_indicator="•"
+    else
+      attachment_indicator="$session_attached"
     fi
-    attachment_indicator=$(format_attachment_display "$session" "$last_session" "$session_attached")
+  fi
+
+  if [ "$session" == "$last_session" ]; then
+    session_display=""
+  fi
+
+  if [ "$current_window" == "$last_window" ]; then
+    window_display=""
   fi
 
   # Get client width for this session (only show on first line of session)
-  width_display=$(format_width_display "$session" "$last_session" "$(get_session_width "$session" "$client_data")")
+  width_display=""
+  if [ "$session" != "$last_session" ]; then
+    # Get current client's width if we're in that session, otherwise use first client
+    if [ "$session" = "$(tmux display-message -p '#{session_name}' 2>/dev/null)" ]; then
+      width_display=$(tmux display-message -p '#{client_width}' 2>/dev/null)
+    else
+      width_display=$(echo "$client_data" | grep "^$session " | head -1 | cut -d' ' -f2)
+    fi
+    width_display="${width_display:-"-"}"
+  fi
 
-  # Print output based on show_pid flag
+  # Print output based on show_pid flag with tighter column widths
   if [ "$show_pid" = true ]; then
-    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$pid" "$path"
+    printf "%-1s %-13s %-3s  %-8s  %-1s  %-7s  %-3s  %-5s  %s\n" "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$pid" "$path"
   else
-    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display"
+    printf "%-1s %-13s %-3s  %-8s  %-1s  %-7s  %-3s\n" "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display"
   fi
 
   last_session="$session"
