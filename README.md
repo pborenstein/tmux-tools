@@ -252,6 +252,31 @@ The modular architecture separates concerns:
 
 The unified interface provides consistent command-line experience while maintaining separation between functional components.
 
+## Documentation
+
+### Complete Documentation
+
+For comprehensive documentation, see the [`docs/`](docs/) directory:
+
+| Document | Description |
+|:---------|:------------|
+| **[Architecture](docs/architecture.md)** | Detailed system design, component architecture, and extension points |
+| **[Configuration](docs/configuration.md)** | Complete configuration reference with examples and best practices |
+| **[Integration](docs/integration.md)** | Automation examples, JSON API, and workflow integration |
+| **[Development](docs/development.md)** | Contributing guide, coding standards, and testing framework |
+| **[Examples](docs/examples/)** | Practical usage examples and advanced workflows |
+
+### Quick Reference
+
+| Need | See |
+|:-----|:----|
+| **Getting started** | Quick Start section above |
+| **Advanced usage** | [Integration Guide](docs/integration.md) |
+| **Custom configuration** | [Configuration Reference](docs/configuration.md) |
+| **Contributing** | [Development Guide](docs/development.md) |
+| **System design** | [Architecture Documentation](docs/architecture.md) |
+| **Real-world examples** | [Examples Directory](docs/examples/) |
+
 ## License
 
 MIT License - See LICENSE file for details.
