@@ -81,13 +81,13 @@ Control visual appearance and themes.
 
 #### Theme Options
 
-| Theme | Description | Use Case |
-|-------|-------------|----------|
-| `default` | Balanced colors for general use | Standard terminals |
-| `vibrant` | Bright colors for high contrast | Dark themes, outdoor use |
-| `subtle` | Muted colors for professional environments | Work environments, presentations |
-| `monochrome` | Single color scheme | Accessibility, consistency |
-| `none` | No colors (plain text) | Scripting, automation, piping |
+| Theme | Colors | Use Case | Environment |
+|-------|--------|----------|-------------|
+| `default` | Balanced | General use | Standard terminals |
+| `vibrant` | Bright/saturated | High contrast | Dark themes, outdoor |
+| `subtle` | Muted/professional | Work environments | Presentations |
+| `monochrome` | Single color | Accessibility | Consistency needs |
+| `none` | No colors | Scripting/automation | Piping, logs |
 
 #### Display Configuration
 
@@ -107,11 +107,10 @@ Configure session and window naming schemes.
 
 #### Built-in Name Pools
 
-**Cities (session_pool: "cities")**:
-`rio`, `oslo`, `lima`, `bern`, `cairo`, `tokyo`, `paris`, `milan`, `berlin`, `sydney`, `boston`, `madrid`
-
-**Mammals (window_pool: "mammals")**:
-`cat`, `dog`, `fox`, `bat`, `elk`, `bear`, `lion`, `wolf`, `seal`, `deer`, `otter`, `mouse`
+| Pool Type | Pool Name | Sample Names | Count |
+|-----------|-----------|--------------|-------|
+| Sessions | `cities` | rio, oslo, lima, bern, cairo, tokyo | 12 |
+| Windows | `mammals` | cat, dog, fox, bat, elk, bear | 12 |
 
 #### Custom Name Pools
 
@@ -178,32 +177,22 @@ Configuration can be overridden with environment variables:
 
 ### Core Settings
 
-```bash
-# Theme settings
-export TMUX_TOOLS_THEME=vibrant
-export TMUX_TOOLS_COLORS=false
-
-# Naming settings
-export TMUX_TOOLS_SESSION_POOL=custom
-export TMUX_TOOLS_WINDOW_POOL=mammals
-
-# Display settings
-export TMUX_TOOLS_ATTACHMENT_INDICATOR="★"
-export TMUX_TOOLS_DEFAULT_FORMAT=detailed
-```
+| Category | Variable | Example | Purpose |
+|----------|----------|---------|----------|
+| **Theme** | `TMUX_TOOLS_THEME` | `vibrant` | Color scheme |
+| | `TMUX_TOOLS_COLORS` | `false` | Enable/disable colors |
+| **Naming** | `TMUX_TOOLS_SESSION_POOL` | `custom` | Session name source |
+| | `TMUX_TOOLS_WINDOW_POOL` | `mammals` | Window name source |
+| **Display** | `TMUX_TOOLS_ATTACHMENT_INDICATOR` | `"★"` | Session indicator |
+| | `TMUX_TOOLS_DEFAULT_FORMAT` | `detailed` | Output format |
 
 ### Temporary Overrides
 
-```bash
-# Override theme for single command
-TMUX_TOOLS_THEME=none tmux-tools overview
-
-# Disable colors for piping
-TMUX_TOOLS_COLORS=false tmux-tools status > report.txt
-
-# Use custom format
-TMUX_TOOLS_DEFAULT_FORMAT=json tmux-tools overview > sessions.json
-```
+| Purpose | Command | Use Case |
+|---------|---------|----------|
+| Disable colors | `TMUX_TOOLS_THEME=none tmux-tools overview` | Single command |
+| Disable for piping | `TMUX_TOOLS_COLORS=false tmux-tools status > report.txt` | File output |
+| JSON format | `TMUX_TOOLS_DEFAULT_FORMAT=json tmux-tools overview > sessions.json` | Scripting |
 
 ## Advanced Configuration
 
@@ -297,33 +286,19 @@ tmux-tools config test
 
 ### Common Validation Errors
 
-```yaml
-# ❌ Invalid theme
-display:
-  theme: "invalid-theme"              # Error: unknown theme
-
-# ❌ Empty custom pool
-naming:
-  session_pool: "custom"
-  custom_sessions: []                 # Error: empty custom pool
-
-# ❌ Invalid format
-output:
-  default_format: "invalid"           # Error: unknown format
-```
+| Error Type | Problem | Example | Fix |
+|------------|---------|---------|-----|
+| Invalid theme | Unknown theme name | `theme: "invalid-theme"` | Use valid theme |
+| Empty pool | Custom pool with no names | `custom_sessions: []` | Add names to pool |
+| Invalid format | Unknown output format | `default_format: "invalid"` | Use valid format |
 
 ### Configuration Debugging
 
-```bash
-# Show configuration resolution
-tmux-tools config debug
-
-# Show which file is being used
-tmux-tools config source
-
-# Show all available options
-tmux-tools config help
-```
+| Command | Purpose | Output |
+|---------|---------|--------|
+| `tmux-tools config debug` | Show resolution process | Configuration loading steps |
+| `tmux-tools config source` | Show active file | Which config file is used |
+| `tmux-tools config help` | Show options | All available settings |
 
 ## Configuration Examples
 
@@ -434,42 +409,28 @@ tmux-tools config edit
 
 ### Backup and Restore
 
-```bash
-# Backup current configuration
-cp ~/.tmux-tools.yaml ~/.tmux-tools.yaml.backup
-
-# Restore from backup
-cp ~/.tmux-tools.yaml.backup ~/.tmux-tools.yaml
-
-# Create version-controlled configuration
-mkdir -p ~/.config/tmux-tools
-cp ~/.tmux-tools.yaml ~/.config/tmux-tools/config.yaml
-```
+| Action | Command | Purpose |
+|--------|---------|----------|
+| Backup | `cp ~/.tmux-tools.yaml ~/.tmux-tools.yaml.backup` | Save current config |
+| Restore | `cp ~/.tmux-tools.yaml.backup ~/.tmux-tools.yaml` | Restore from backup |
+| Version control | `mkdir -p ~/.config/tmux-tools && cp ~/.tmux-tools.yaml ~/.config/tmux-tools/config.yaml` | Use XDG location |
 
 ### Sharing Configuration
 
-```bash
-# Export shareable configuration (no personal paths)
-tmux-tools config export --portable > tmux-tools-config.yaml
-
-# Import configuration
-tmux-tools config import tmux-tools-config.yaml
-```
+| Action | Command | Use Case |
+|--------|---------|----------|
+| Export | `tmux-tools config export --portable > config.yaml` | Share with team |
+| Import | `tmux-tools config import config.yaml` | Apply shared config |
 
 ## Troubleshooting Configuration
 
 ### Configuration Not Loading
 
-```bash
-# Check file locations
-tmux-tools config source
-
-# Verify file syntax
-tmux-tools config validate
-
-# Show effective configuration
-tmux-tools config show
-```
+| Issue | Command | Check |
+|-------|---------|-------|
+| File location | `tmux-tools config source` | Which file is used |
+| Syntax errors | `tmux-tools config validate` | YAML validity |
+| Effective config | `tmux-tools config show` | Final settings |
 
 ### Common Issues
 
@@ -532,6 +493,8 @@ tmux-tools config reload
 
 ## Next Steps
 
-- Review [Usage Guide](usage.md) for applying configuration in practice
-- Explore [Architecture Overview](architecture.md) to understand configuration loading
-- Check [Development Guide](development.md) for extending configuration options
+| Priority | Guide | Purpose |
+|----------|-------|----------|
+| 1 | [Usage Guide](usage.md) | Apply configuration in practice |
+| 2 | [Architecture Overview](architecture.md) | Understand configuration system |
+| 3 | [Development Guide](development.md) | Extend configuration options |

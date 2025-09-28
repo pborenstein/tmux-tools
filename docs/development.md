@@ -6,35 +6,22 @@ This guide covers contributing to tmux-tools, from setting up a development envi
 
 ### Prerequisites
 
-- **Git**: Version control
-- **bash**: Version 4.0 or later
-- **tmux**: For testing functionality
-- **ShellCheck**: For bash linting (recommended)
-- **bats**: For testing framework (optional)
+| Tool | Purpose | Required |
+|------|---------|----------|
+| Git | Version control | Yes |
+| bash | Script execution (4.0+) | Yes |
+| tmux | Testing functionality | Yes |
+| ShellCheck | Bash linting | Recommended |
+| bats | Testing framework | Optional |
 
 ### Development Installation
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd tmux-tools
-
-# Set up development environment
-make dev-setup  # If Makefile exists, otherwise:
-
-# Make scripts executable
-chmod +x tmux-status.sh tmux-overview tmux-tools
-
-# Install development dependencies
-# macOS
-brew install shellcheck bats-core
-
-# Ubuntu/Debian
-sudo apt install shellcheck bats
-
-# Test installation
-./tmux-tools --help
-```
+| Step | Command | Platform |
+|------|---------|----------|
+| Clone & setup | `git clone <url> && cd tmux-tools && chmod +x *.sh tmux-tools` | All |
+| Dependencies (macOS) | `brew install shellcheck bats-core` | macOS |
+| Dependencies (Linux) | `sudo apt install shellcheck bats` | Ubuntu/Debian |
+| Test | `./tmux-tools --help` | All |
 
 ### Development Configuration
 
@@ -82,11 +69,13 @@ tmux-tools/
 
 ### Code Organization Principles
 
-1. **Shared functionality** goes in `lib/` modules
-2. **Tool-specific logic** stays in individual scripts
-3. **Configuration** is centralized in `tmux_config.sh`
-4. **Display formatting** is abstracted in `tmux_display.sh`
-5. **Legacy compatibility** is maintained in original scripts
+| Component | Location | Purpose |
+|-----------|----------|----------|
+| Shared functionality | `lib/` modules | Reusable code |
+| Tool-specific logic | Individual scripts | Specific features |
+| Configuration | `tmux_config.sh` | Centralized settings |
+| Display formatting | `tmux_display.sh` | Output abstraction |
+| Legacy compatibility | Original scripts | Backward support |
 
 ## Coding Standards
 
@@ -650,19 +639,23 @@ time ./tmux-tools status
 
 ### Resources
 
-- **Issue Tracker**: Report bugs and request features
-- **Discussions**: Ask questions and share ideas
-- **Wiki**: Additional documentation and examples
-- **Code Review**: Submit pull requests for review
+| Resource | Purpose | Access |
+|----------|---------|--------|
+| Issue Tracker | Bug reports, feature requests | GitHub Issues |
+| Discussions | Questions, ideas | GitHub Discussions |
+| Wiki | Additional documentation | Project Wiki |
+| Code Review | Pull request review | GitHub PRs |
 
 ### Contributing Guidelines
 
-1. **Fork** the repository
-2. **Create feature branch**: `git checkout -b feature/new-feature`
-3. **Make changes** following coding standards
-4. **Add tests** for new functionality
-5. **Update documentation** as needed
-6. **Submit pull request** with clear description
+| Step | Action | Command/Note |
+|------|--------|-------------|
+| 1 | Fork repository | GitHub fork button |
+| 2 | Create feature branch | `git checkout -b feature/new-feature` |
+| 3 | Make changes | Follow coding standards |
+| 4 | Add tests | Test new functionality |
+| 5 | Update docs | Document changes |
+| 6 | Submit PR | Clear description required |
 
 ### Contact
 
@@ -672,12 +665,12 @@ time ./tmux-tools status
 
 ## Next Steps
 
-After reading this guide:
-
-1. Set up your development environment
-2. Run the test suite to verify setup
-3. Read the [Architecture Overview](architecture.md) for deeper understanding
-4. Start with small contributions to get familiar with the codebase
-5. Join the community and ask questions
+| Priority | Action | Purpose |
+|----------|--------|----------|
+| 1 | Set up development environment | Enable contribution |
+| 2 | Run test suite | Verify setup |
+| 3 | Read [Architecture Overview](architecture.md) | Understand system |
+| 4 | Start small contributions | Learn codebase |
+| 5 | Join community | Get support |
 
 Happy developing!

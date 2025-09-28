@@ -4,13 +4,13 @@ This document provides a technical overview of tmux-tools architecture, covering
 
 ## Design Philosophy
 
-tmux-tools follows these architectural principles:
-
-- **Modularity**: Shared libraries eliminate code duplication
-- **Consistency**: Unified interface with predictable behavior
-- **Extensibility**: Plugin-ready architecture for future enhancements
-- **Backward Compatibility**: Original scripts preserved and functional
-- **Configuration-Driven**: YAML-based customization without code changes
+| Principle | Implementation | Benefit |
+|-----------|----------------|----------|
+| **Modularity** | Shared libraries | Eliminate code duplication |
+| **Consistency** | Unified interface | Predictable behavior |
+| **Extensibility** | Plugin-ready architecture | Future enhancements |
+| **Backward Compatibility** | Original scripts preserved | Maintained functionality |
+| **Configuration-Driven** | YAML-based customization | No code changes needed |
 
 ## Project Structure
 
@@ -105,18 +105,21 @@ init_colors() → load_theme() → set_color_codes() → apply_colors()
 
 **Supported Themes**:
 
-| Theme | Use Case | Color Characteristics |
-|-------|----------|----------------------|
-| `default` | General use | Balanced, readable colors |
-| `vibrant` | High contrast | Bright, saturated colors |
-| `subtle` | Professional | Muted, understated colors |
-| `monochrome` | Accessibility | Single color variations |
-| `none` | Scripting | No color codes |
+| Theme | Use Case | Colors | Purpose |
+|-------|----------|--------|----------|
+| `default` | General use | Balanced | Standard terminals |
+| `vibrant` | High contrast | Bright/saturated | Dark themes |
+| `subtle` | Professional | Muted | Work environments |
+| `monochrome` | Accessibility | Single color | Consistency |
+| `none` | Scripting | No colors | Automation |
 
 **Color Detection**:
-- Environment variable support (`TMUX_TOOLS_THEME`, `NO_COLOR`)
-- Terminal capability detection
-- Graceful fallback to no-color mode
+
+| Method | Variables | Fallback |
+|--------|-----------|----------|
+| Environment | `TMUX_TOOLS_THEME`, `NO_COLOR` | User preference |
+| Terminal capability | Auto-detection | Compatibility check |
+| Graceful fallback | No-color mode | Always works |
 
 ### 5. Configuration System (`lib/tmux_config.sh`)
 
@@ -333,30 +336,19 @@ process_sessions() {
 
 ### Input Validation
 
-All user inputs are validated:
-
-```bash
-validate_session_name() {
-    local name="$1"
-    if [[ ! "$name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-        echo "Error: Invalid session name: $name" >&2
-        return 1
-    fi
-}
-```
+| Input Type | Validation | Pattern | Purpose |
+|------------|------------|---------|----------|
+| Session names | Regex pattern | `^[a-zA-Z0-9_-]+$` | Security |
+| User parameters | Type checking | Various | Safety |
+| Configuration | YAML syntax | Schema validation | Integrity |
 
 ### Safe Command Execution
 
-tmux commands are executed safely:
-
-```bash
-# Quoted arguments prevent injection
-tmux_safe_command() {
-    local cmd="$1"
-    shift
-    tmux "$cmd" "$@"
-}
-```
+| Method | Technique | Protection |
+|--------|-----------|------------|
+| Quoted arguments | Parameter quoting | Injection prevention |
+| Command validation | Input checking | Command safety |
+| Error handling | Return code checks | Failure detection |
 
 ### Configuration File Security
 
@@ -434,20 +426,22 @@ test_large_session_performance() {
 
 ### Planned Improvements
 
-1. **Plugin System**: Dynamic loading of name generators and output formats
-2. **API Layer**: RESTful API for remote tmux management
-3. **WebSocket Integration**: Real-time session monitoring
-4. **Distributed Sessions**: Multi-server tmux management
-5. **AI Integration**: Context-aware session naming and management
+| Priority | Feature | Purpose | Impact |
+|----------|---------|---------|--------|
+| 1 | Plugin System | Dynamic loading | Extensible generators |
+| 2 | API Layer | RESTful interface | Remote management |
+| 3 | WebSocket Integration | Real-time monitoring | Live updates |
+| 4 | Distributed Sessions | Multi-server support | Scalability |
+| 5 | AI Integration | Context-aware naming | Intelligent automation |
 
 ### Backward Compatibility Strategy
 
-All architectural changes maintain compatibility:
-
-- Original scripts (`tmux-status.sh`, `tmux-overview`) remain functional
-- Library changes use versioned interfaces
-- Configuration format supports migrations
-- Command-line interfaces remain stable
+| Component | Approach | Guarantee |
+|-----------|----------|----------|
+| Original scripts | Preserved functionality | `tmux-status.sh`, `tmux-overview` |
+| Library changes | Versioned interfaces | API stability |
+| Configuration | Migration support | Format evolution |
+| Command-line | Interface stability | Consistent CLI |
 
 ## Conclusion
 
@@ -455,7 +449,9 @@ The tmux-tools architecture balances simplicity with extensibility, providing a 
 
 ## Related Documentation
 
-- [Installation Guide](installation.md) - Setting up the architecture
-- [Usage Guide](usage.md) - Using the tools in practice
-- [Configuration Guide](configuration.md) - Customizing behavior
-- [Development Guide](development.md) - Contributing to the architecture
+| Guide | Focus | Audience |
+|-------|-------|----------|
+| [Installation](installation.md) | Setup and deployment | All users |
+| [Usage](usage.md) | Practical application | End users |
+| [Configuration](configuration.md) | Customization | Power users |
+| [Development](development.md) | Contributing | Developers |

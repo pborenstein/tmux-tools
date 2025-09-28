@@ -132,32 +132,23 @@ Tmux Sessions (Detailed)
 
 ## Command Reference
 
-### tmux-status.sh Options
-| Option | Description |
-|--------|-------------|
-| `--show-pid` | Show PID and path columns |
-| `--rename-defaults` | Rename sessions with default prefix |
-| `--rename-sessions` | Rename ALL sessions to city names |
-| `--rename-windows` | Rename ALL windows to mammal names |
-| `--help` | Show help message |
-
-### tmux-overview Options
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--detailed` | `-d` | Show detailed view with all panes |
-| `--json` | `-j` | Output in JSON format |
-| `--session NAME` | `-s` | Show only specified session |
-| `--help` | `-h` | Show help message |
-
-### tmux-tools Commands
-| Command | Description |
-|---------|-------------|
-| `status [options]` | Show tabular session status |
-| `overview [options]` | Show session overview |
-| `rename <target>` | Rename sessions/windows/auto |
-| `config <action>` | Manage configuration |
-| `help` | Show help information |
-| `version` | Show version information |
+| Tool | Option/Command | Short | Description |
+|------|----------------|-------|-------------|
+| **tmux-status.sh** | | | |
+| | `--show-pid` | | Show PID and path columns |
+| | `--rename-defaults` | | Rename default-named sessions |
+| | `--rename-sessions` | | Rename ALL sessions to cities |
+| | `--rename-windows` | | Rename ALL windows to mammals |
+| **tmux-overview** | | | |
+| | `--detailed` | `-d` | Show all panes in detail |
+| | `--json` | `-j` | Machine-readable output |
+| | `--session NAME` | `-s` | Filter to specific session |
+| **tmux-tools** | | | |
+| | `status [options]` | | Tabular session display |
+| | `overview [options]` | | Tree session display |
+| | `rename <target>` | | Batch rename operations |
+| | `config <action>` | | Configuration management |
+| | `help` / `version` | | Information commands |
 
 ## Configuration
 
@@ -189,25 +180,19 @@ tmux-tools config show
 ```
 
 ### JSON Scripting
-```bash
-# Count total panes
-tmux-overview --json | jq '[.sessions[].windows[].panes] | add'
 
-# List running commands
-tmux-overview --json | jq -r '.sessions[].windows[].pane_details[].command' | sort | uniq
-
-# Find sessions with >2 windows
-tmux-overview --json | jq -r '.sessions[] | select(.windows | length > 2) | .name'
-```
+| Task | Command |
+|------|----------|
+| Count total panes | `tmux-overview --json \| jq '[.sessions[].windows[].panes] \| add'` |
+| List running commands | `tmux-overview --json \| jq -r '.sessions[].windows[].pane_details[].command' \| sort \| uniq` |
+| Find sessions with >2 windows | `tmux-overview --json \| jq -r '.sessions[] \| select(.windows \| length > 2) \| .name'` |
 
 ### Session Filtering
-```bash
-# Show specific sessions
-./tmux-overview --session "oslo,milan"
 
-# Use with unified interface
-tmux-tools overview -s dev
-```
+| Method | Command | Result |
+|--------|---------|--------|
+| Multiple sessions | `./tmux-overview --session "oslo,milan"` | Show named sessions |
+| Unified interface | `tmux-tools overview -s dev` | Filter via tmux-tools |
 
 ## Requirements
 
@@ -217,11 +202,13 @@ tmux-tools overview -s dev
 
 ## Documentation
 
-- [Installation Guide](docs/installation.md)
-- [Usage Examples](docs/usage.md)
-- [Configuration Guide](docs/configuration.md)
-- [Architecture Overview](docs/architecture.md)
-- [Development Guide](docs/development.md)
+| Guide | Focus | Audience |
+|-------|-------|----------|
+| [Installation](docs/installation.md) | Setup and deployment | All users |
+| [Usage](docs/usage.md) | Commands and examples | End users |
+| [Configuration](docs/configuration.md) | Customization options | Power users |
+| [Architecture](docs/architecture.md) | System design | Developers |
+| [Development](docs/development.md) | Contributing | Contributors |
 
 ## Troubleshooting
 

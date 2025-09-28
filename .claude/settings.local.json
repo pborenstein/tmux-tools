@@ -25,7 +25,8 @@
       "Bash(get_window_data)",
       "Bash(tmux:*)",
       "Bash(./tmux-tools rename:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "WebFetch(domain:gist.github.com)"
     ],
     "deny": [],
     "ask": []

@@ -12,106 +12,22 @@ Before installing tmux-tools, ensure you have:
 
 ### Installing tmux
 
-If tmux is not installed on your system:
-
-#### macOS
-```bash
-# Using Homebrew
-brew install tmux
-
-# Using MacPorts
-sudo port install tmux
-```
-
-#### Linux (Ubuntu/Debian)
-```bash
-sudo apt update
-sudo apt install tmux
-```
-
-#### Linux (RHEL/CentOS/Fedora)
-```bash
-# RHEL/CentOS
-sudo yum install tmux
-
-# Fedora
-sudo dnf install tmux
-```
+| Platform | Package Manager | Command |
+|----------|----------------|----------|
+| **macOS** | Homebrew | `brew install tmux` |
+| | MacPorts | `sudo port install tmux` |
+| **Ubuntu/Debian** | APT | `sudo apt update && sudo apt install tmux` |
+| **RHEL/CentOS** | YUM | `sudo yum install tmux` |
+| **Fedora** | DNF | `sudo dnf install tmux` |
 
 ## Installation Methods
 
-### 1. Quick Local Setup (Recommended for Development)
-
-Clone and set up for local use:
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd tmux-tools
-
-# Make scripts executable
-chmod +x tmux-status.sh tmux-overview tmux-tools
-
-# Test installation
-./tmux-tools --help
-```
-
-### 2. System-Wide Installation
-
-Install to system PATH for all users:
-
-```bash
-# After cloning and setting permissions
-sudo cp tmux-tools /usr/local/bin/
-sudo cp tmux-status.sh /usr/local/bin/
-sudo cp tmux-overview /usr/local/bin/
-
-# Copy library files
-sudo mkdir -p /usr/local/lib/tmux-tools
-sudo cp -r lib/ /usr/local/lib/tmux-tools/
-
-# Test system installation
-tmux-tools --help
-```
-
-### 3. User-Local Installation
-
-Install to personal bin directory:
-
-```bash
-# Create personal bin if it doesn't exist
-mkdir -p ~/bin
-
-# Copy executables
-cp tmux-tools ~/bin/
-cp tmux-status.sh ~/bin/
-cp tmux-overview ~/bin/
-
-# Copy library files
-mkdir -p ~/.local/lib/tmux-tools
-cp -r lib/ ~/.local/lib/tmux-tools/
-
-# Add to PATH (add to ~/.bashrc or ~/.zshrc)
-export PATH="$HOME/bin:$PATH"
-
-# Reload shell configuration
-source ~/.bashrc  # or ~/.zshrc
-```
-
-### 4. Package Manager Installation (Future)
-
-Package manager support is planned:
-
-```bash
-# Homebrew (planned)
-brew install tmux-tools
-
-# APT (planned)
-sudo apt install tmux-tools
-
-# NPM (planned)
-npm install -g tmux-tools
-```
+| Method | Target | Commands | Use Case |
+|--------|--------|----------|----------|
+| **Quick Local** | Development | `git clone <url> && cd tmux-tools && chmod +x *.sh tmux-tools` | Testing, development |
+| **System-Wide** | All users | `sudo cp tmux-tools tmux-*.sh /usr/local/bin/ && sudo mkdir -p /usr/local/lib/tmux-tools && sudo cp -r lib/ /usr/local/lib/tmux-tools/` | Production servers |
+| **User-Local** | Single user | `mkdir -p ~/bin ~/.local/lib/tmux-tools && cp tmux-tools tmux-*.sh ~/bin/ && cp -r lib/ ~/.local/lib/tmux-tools/` | Personal machines |
+| **Package Managers** | Automated | `brew install tmux-tools` (planned) | Future convenience |
 
 ## Validation
 
@@ -161,14 +77,14 @@ tmux-tools config edit
 
 ### Configuration Locations
 
-tmux-tools looks for configuration in this order:
-
-1. `~/.tmux-tools.yaml`
-2. `~/.tmux-tools.yml`
-3. `~/.config/tmux-tools/config.yaml`
-4. `~/.config/tmux-tools/config.yml`
-5. `./tmux-tools.yaml`
-6. `./tmux-tools.yml`
+| Priority | Location | Purpose |
+|----------|----------|----------|
+| 1 | `~/.tmux-tools.yaml` | User preferences |
+| 2 | `~/.tmux-tools.yml` | User preferences (alt) |
+| 3 | `~/.config/tmux-tools/config.yaml` | XDG standard |
+| 4 | `~/.config/tmux-tools/config.yml` | XDG standard (alt) |
+| 5 | `./tmux-tools.yaml` | Project-specific |
+| 6 | `./tmux-tools.yml` | Project-specific (alt) |
 
 ## Library Path Configuration
 
@@ -186,41 +102,12 @@ echo 'export TMUX_TOOLS_LIB_PATH="/path/to/tmux-tools/lib"' >> ~/.bashrc
 
 ### Common Installation Issues
 
-#### Permission Denied
-```bash
-# Make scripts executable
-chmod +x tmux-status.sh tmux-overview tmux-tools
-
-# For system installation
-sudo cp tmux-tools /usr/local/bin/
-```
-
-#### Command Not Found
-```bash
-# Check if installed location is in PATH
-echo $PATH
-
-# Add to PATH if needed
-export PATH="/usr/local/bin:$PATH"
-```
-
-#### Library Not Found
-```bash
-# Check library path
-ls -la lib/
-
-# Set library path if needed
-export TMUX_TOOLS_LIB_PATH="$(pwd)/lib"
-```
-
-#### tmux Not Running
-```bash
-# Start tmux server
-tmux new-session -d -s test
-
-# Verify tmux is running
-tmux list-sessions
-```
+| Issue | Diagnosis | Solution |
+|-------|-----------|----------|
+| Permission denied | Scripts not executable | `chmod +x tmux-status.sh tmux-overview tmux-tools` |
+| Command not found | PATH missing install dir | `export PATH="/usr/local/bin:$PATH"` |
+| Library not found | Missing lib directory | `export TMUX_TOOLS_LIB_PATH="$(pwd)/lib"` |
+| tmux not running | tmux server stopped | `tmux new-session -d -s test` |
 
 ### Verifying Installation
 
@@ -269,41 +156,18 @@ If you encounter issues:
 
 To remove tmux-tools:
 
-### Local Installation
-```bash
-# Remove from local directory
-rm -rf tmux-tools/
-```
-
-### System Installation
-```bash
-# Remove executables
-sudo rm /usr/local/bin/tmux-tools
-sudo rm /usr/local/bin/tmux-status.sh
-sudo rm /usr/local/bin/tmux-overview
-
-# Remove libraries
-sudo rm -rf /usr/local/lib/tmux-tools
-```
-
-### User Installation
-```bash
-# Remove from personal directories
-rm ~/bin/tmux-tools
-rm ~/bin/tmux-status.sh
-rm ~/bin/tmux-overview
-rm -rf ~/.local/lib/tmux-tools
-
-# Remove configuration (optional)
-rm ~/.tmux-tools.yaml
-rm -rf ~/.config/tmux-tools
-```
+| Installation Type | Removal Commands |
+|-------------------|------------------|
+| **Local** | `rm -rf tmux-tools/` |
+| **System** | `sudo rm /usr/local/bin/tmux-tools /usr/local/bin/tmux-*.sh && sudo rm -rf /usr/local/lib/tmux-tools` |
+| **User** | `rm ~/bin/tmux-tools ~/bin/tmux-*.sh && rm -rf ~/.local/lib/tmux-tools` |
+| **Config** (optional) | `rm ~/.tmux-tools.yaml && rm -rf ~/.config/tmux-tools` |
 
 ## Next Steps
 
-After successful installation:
-
-1. Read the [Usage Guide](usage.md) for detailed examples
-2. Review [Configuration Options](configuration.md) for customization
-3. Explore the [Architecture Overview](architecture.md) to understand the system
-4. Check out [Development Guide](development.md) if you want to contribute
+| Priority | Guide | Purpose |
+|----------|-------|----------|
+| 1 | [Usage Guide](usage.md) | Learn commands and examples |
+| 2 | [Configuration](configuration.md) | Customize for your workflow |
+| 3 | [Architecture](architecture.md) | Understand system design |
+| 4 | [Development](development.md) | Contribute to project |

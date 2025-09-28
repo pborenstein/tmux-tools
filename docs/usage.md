@@ -69,28 +69,26 @@ The status tool provides a compact, table-based view of all tmux sessions, windo
 ./tmux-status.sh --rename-auto
 ```
 
-### Column Explanation
+### Column Reference
 
-| Column | Description | Example |
-|--------|-------------|---------|
-| **session** | Session name (shown once per session group) | `oslo`, `milan` |
-| **win** | Window index within session | `0`, `1`, `2` |
-| **name** | Window name (shown once per window) | `cat`, `bear`, `fox` |
-| **p** | Pane index within window | `0`, `1`, `2` |
-| **cmd** | Running command in pane | `fish`, `vim`, `node` |
-| **w** | Terminal width (client identification) | `89` (iPad), `142` (desktop) |
-| **pid** | Process ID (with --show-pid) | `12345` |
-| **path** | Working directory (with --show-pid) | `/Users/philip/projects` |
+| Column | Description | Example | Notes |
+|--------|-------------|---------|-------|
+| **session** | Session name | `oslo`, `milan` | Shown once per group |
+| **win** | Window index | `0`, `1`, `2` | Within session |
+| **name** | Window name | `cat`, `bear`, `fox` | Shown once per window |
+| **p** | Pane index | `0`, `1`, `2` | Within window |
+| **cmd** | Running command | `fish`, `vim`, `node` | Current process |
+| **w** | Terminal width | `89`, `142` | Device identification |
+| **pid** | Process ID | `12345` | With --show-pid only |
+| **path** | Working directory | `/Users/philip/projects` | With --show-pid only |
 
-### Client Width Identification
+### Device Identification by Width
 
-The width column helps identify connection types:
-
-| Width Range | Typical Device | Use Case |
-|-------------|----------------|----------|
-| 80-100 | Mobile/iPad | Remote work, quick checks |
-| 120-140 | Laptop | Standard development |
-| 140+ | Desktop/Monitor | Full development setup |
+| Width | Device Type | Use Case |
+|-------|-------------|----------|
+| 80-100 | Mobile/iPad | Remote work |
+| 120-140 | Laptop | Development |
+| 140+ | Desktop | Full setup |
 
 ## tmux-overview - Session Overview
 
@@ -156,14 +154,14 @@ The overview tool provides a hierarchical view with multiple output formats.
 
 ### Visual Indicators
 
-| Symbol | Meaning |
-|--------|---------|
-| `●` | Active/attached sessions, windows, or panes |
-| `[attached]` | Session is currently attached to a client |
-| `[detached]` | Session is running but not attached |
-| `├─` | Tree branch (more items below) |
-| `└─` | Last item in group |
-| `│` | Continuation line for detailed view |
+| Symbol | Meaning | Context |
+|--------|---------|----------|
+| `●` | Active/current | Sessions, windows, panes |
+| `[attached]` | Client connected | Session status |
+| `[detached]` | No client | Session status |
+| `├─` | Tree branch | More items follow |
+| `└─` | Last item | End of group |
+| `│` | Continuation | Detailed view lines |
 
 ## tmux-tools - Unified Interface
 
@@ -243,20 +241,13 @@ tmux-tools --version
 
 ### Color Themes
 
-Set visual themes for different environments:
-
-```bash
-# Environment variable (temporary)
-export TMUX_TOOLS_THEME=vibrant
-./tmux-overview
-
-# Available themes
-export TMUX_TOOLS_THEME=default    # Balanced colors
-export TMUX_TOOLS_THEME=vibrant    # Bright colors
-export TMUX_TOOLS_THEME=subtle     # Muted colors
-export TMUX_TOOLS_THEME=monochrome # Single color
-export TMUX_TOOLS_THEME=none       # No colors
-```
+| Theme | Characteristics | Use Case | Command |
+|-------|----------------|----------|----------|
+| `default` | Balanced colors | General use | `export TMUX_TOOLS_THEME=default` |
+| `vibrant` | Bright colors | High contrast | `export TMUX_TOOLS_THEME=vibrant` |
+| `subtle` | Muted colors | Professional | `export TMUX_TOOLS_THEME=subtle` |
+| `monochrome` | Single color | Accessibility | `export TMUX_TOOLS_THEME=monochrome` |
+| `none` | No colors | Scripting | `export TMUX_TOOLS_THEME=none` |
 
 ### JSON Scripting Examples
 
@@ -491,45 +482,16 @@ tmux-tools overview -s "$session_name" --json
 
 ## Troubleshooting Common Issues
 
-### No sessions showing
-
-```bash
-# Check if tmux is running
-tmux list-sessions
-
-# Start a test session
-tmux new-session -d -s test
-
-# Verify tools work
-tmux-tools status
-```
-
-### Inconsistent renaming
-
-```bash
-# Reset all sessions to cities
-tmux-tools rename sessions
-
-# Reset all windows to mammals
-tmux-tools rename windows
-
-# Use auto-rename for gentle cleanup
-tmux-tools rename auto
-```
-
-### Color display issues
-
-```bash
-# Test color support
-export TMUX_TOOLS_THEME=vibrant
-tmux-tools overview
-
-# Disable colors if needed
-export TMUX_TOOLS_THEME=none
-```
+| Issue | Diagnosis | Solution |
+|-------|-----------|----------|
+| No sessions showing | tmux not running | `tmux new-session -d -s test && tmux-tools status` |
+| Inconsistent renaming | Mixed naming schemes | `tmux-tools rename auto` for gentle cleanup |
+| Color display issues | Terminal compatibility | `export TMUX_TOOLS_THEME=none` to disable |
 
 ## Next Steps
 
-- Explore [Configuration Options](configuration.md) for customization
-- Review [Architecture Overview](architecture.md) to understand the system
-- Check [Development Guide](development.md) for contributing
+| Priority | Guide | Purpose |
+|----------|-------|----------|
+| 1 | [Configuration](configuration.md) | Customize for your workflow |
+| 2 | [Architecture](architecture.md) | Understand system design |
+| 3 | [Development](development.md) | Contribute to project |
