@@ -1,34 +1,19 @@
 # tmux-tools
 
-A comprehensive tmux session management toolkit that provides tabular status display, session overview, and intelligent renaming with a unified command interface.
+A tmux session management toolkit that provides tabular status display, session overview, and intelligent renaming with a unified command interface.
 
 ## Features
 
-### Core Capabilities
-
-- **Unified Interface**: Single `tmux-tools` command with consistent options
-- **Tabular Status Display**: Compact view of all sessions, windows, and panes
-- **Comprehensive Overview**: Tree structure with summary and detailed views
-- **Smart Renaming**: Intelligent session and window naming with city/mammal schemes
-- **JSON Output**: Machine-readable format for scripting and automation
-- **Configuration Support**: YAML-based configuration with custom name pools
-- **Color Themes**: Multiple color schemes including accessibility options
-- **Backward Compatibility**: Original scripts work unchanged
-
-### Display Modes
-
-- **Compact View**: Essential information in tabular format
-- **Detailed View**: Full process and path information
-- **Summary Overview**: Session counts and window structure
-- **Tree Overview**: Complete hierarchy with pane details
-- **JSON Export**: Structured data for integration
-
-### Visual Indicators
-
-- **Client Width Display**: Identifies device type (89 = iPad, 142+ = desktop)
-- **Attachment Status**: Shows which sessions are actively connected
-- **Active Markers**: Highlights current windows and panes
-- **Color Coding**: Theme-aware status indication
+- Single `tmux-tools` command with consistent options
+- Compact tabular view of all sessions, windows, and panes
+- Tree structure with summary and detailed views
+- Session and window naming with city/mammal schemes
+- JSON output for scripting and automation
+- YAML-based configuration with custom name pools
+- Multiple color schemes including accessibility options
+- Client width display identifies device type (89 = iPad, 142+ = desktop)
+- Shows which sessions are actively connected
+- Original scripts work unchanged
 
 ## Quick Start
 
@@ -56,71 +41,26 @@ chmod +x tmux-tools tmux-status.sh tmux-overview
 tmux-tools config create
 ```
 
-## Command Reference
-
-### tmux-tools Commands
+## Usage
 
 ```bash
 tmux-tools <command> [options]
 ```
 
-**Commands**:
+| Command | Purpose | Key Options |
+|---------|---------|-------------|
+| `status` | Tabular session display | `--show-pid`, `--rename-auto` |
+| `overview` | Tree overview | `--detailed`, `--json`, `-s <session>` |
+| `rename` | Session/window renaming | `sessions`, `windows`, `auto` |
+| `config` | Configuration management | `show`, `create`, `edit` |
 
-- `status` - Tabular session status display
-- `overview` - Comprehensive session overview
-- `rename` - Session and window renaming
-- `config` - Configuration management
-- `help` - Show help information
-- `version` - Show version information
-
-### Status Command
-
+Common patterns:
 ```bash
-tmux-tools status [options]
+tmux-tools status                    # Quick status check
+tmux-tools overview --detailed       # Full session tree
+tmux-tools rename auto               # Clean up default names
+tmux-tools config create             # Generate config file
 ```
-
-**Options**:
-
-- `--show-pid` - Include process IDs and full paths
-- `--rename-auto` - Rename default-named sessions before display
-- `--rename-sessions` - Rename all sessions to city names
-- `--rename-windows` - Rename all windows to mammal names
-
-### Overview Command
-
-```bash
-tmux-tools overview [options]
-```
-
-**Options**:
-
-- `--detailed`, `-d` - Show all panes with commands and paths
-- `--json`, `-j` - Output in JSON format
-- `--session NAME`, `-s` - Show only specified session
-
-### Rename Command
-
-```bash
-tmux-tools rename <target> [options]
-```
-
-**Targets**:
-
-- `sessions` - Rename all sessions to city names
-- `windows` - Rename all windows to mammal names
-- `auto` - Smart rename only default-named sessions
-
-### Configuration Command
-
-```bash
-tmux-tools config <action>
-```
-
-**Actions**:
-
-- `show` - Display current configuration
-- `create` - Create example configuration file
-- `edit` - Edit configuration file
 
 ## Output Examples
 
@@ -245,7 +185,9 @@ output:
 
 ### Environment Variables
 
-| Variable | Default | Description |
+Configuration can also be controlled via environment variables:
+
+| Variable | Default | Purpose |
 |----------|---------|-------------|
 | `TMUX_TOOLS_THEME` | "default" | Color theme |
 | `TMUX_TOOLS_SESSION_POOL` | "cities" | Session naming pool |
@@ -254,28 +196,19 @@ output:
 
 ## Naming Schemes
 
-### Session Names (Cities)
-rio, oslo, lima, bern, cairo, tokyo, paris, milan, berlin, sydney, boston, madrid
+Sessions use city names: rio, oslo, lima, bern, cairo, tokyo, paris, milan, berlin, sydney, boston, madrid
 
-### Window Names (Mammals)
-cat, dog, fox, bat, elk, bear, lion, wolf, seal, deer, otter, mouse
+Windows use mammal names: cat, dog, fox, bat, elk, bear, lion, wolf, seal, deer, otter, mouse
 
-### Conflict Resolution
+Conflicts are resolved by using the next available name. Windows only need unique names within each session. No number suffixes are added.
 
-- Sessions: Avoids conflicts by using next available city name
-- Windows: Names only need to be unique within each session
-- No number suffixes - moves to next available name
-
-## Visual Indicators
+## Display Reference
 
 ### Status Symbols
 
 - `*` - Active/attached sessions, windows, or panes
 - `[attached]` - Session is currently connected
 - `[detached]` - Session is running but not connected
-
-### Tree Structure
-
 - Indentation shows hierarchy structure
 - Active items marked with [active]
 
@@ -307,7 +240,7 @@ For detailed technical information, see [docs/architecture.md](docs/architecture
 
 ## Scripting and Integration
 
-### JSON Processing
+JSON output enables integration with other tools:
 
 ```bash
 # Count total panes across all sessions
@@ -318,37 +251,19 @@ tmux-tools overview --json | jq -r '.sessions[].windows[].pane_details[].command
 
 # Find sessions with more than 2 windows
 tmux-tools overview --json | jq -r '.sessions[] | select(.windows | length > 2) | .name'
-```
 
-### Automation Examples
-
-```bash
 # Monitor session health
 if tmux-tools overview --json | jq -e '.sessions | length > 0' >/dev/null; then
   echo "tmux is running with sessions"
-else
-  echo "No tmux sessions found"
 fi
 
 # Auto-organize sessions
-tmux-tools rename auto  # Only rename default sessions
+tmux-tools rename auto
 ```
 
 ## Migration from Original Scripts
 
-The refactored toolkit maintains complete backward compatibility:
-
-### Existing Usage Still Works
-
-```bash
-# These commands work unchanged
-./tmux-status.sh
-./tmux-status.sh --rename-auto
-./tmux-overview --detailed
-./tmux-overview --json
-```
-
-### Migrating to Unified Interface
+Original scripts work unchanged. To use the unified interface:
 
 ```bash
 # Old → New
@@ -364,70 +279,25 @@ The refactored toolkit maintains complete backward compatibility:
 - **bash**: Version 4.0 or later
 - **Standard Unix tools**: date, sort, etc.
 
-### Optional Dependencies
-
-- **jq**: For JSON processing examples
-- **YAML tools**: For advanced configuration editing
+Optional: **jq** for JSON processing, **YAML tools** for advanced configuration editing
 
 ## Troubleshooting
 
-### Common Issues
+**No tmux sessions found**: Start a session with `tmux new-session -d -s test`
 
-**No tmux sessions found**
-```bash
-# Start a test session
-tmux new-session -d -s test
-```
+**Colors not displaying**: Check terminal with `echo $TERM` or disable with `export NO_COLOR=1`
 
-**Colors not displaying**
-```bash
-# Check terminal capabilities
-echo $TERM
+**Configuration not loading**: Check location with `tmux-tools config show` or create with `tmux-tools config create`
 
-# Disable colors if needed
-export NO_COLOR=1
-tmux-tools status
-```
-
-**Configuration not loading**
-```bash
-# Check configuration file location
-tmux-tools config show
-
-# Create example configuration
-tmux-tools config create
-```
-
-### Error Messages
-
-- **"tmux not found"**: Install tmux package manager
-- **"tmux server not running"**: Start tmux with `tmux new-session`
-- **"Config file not found"**: Use `tmux-tools config create`
+**"tmux not found"**: Install tmux
+**"tmux server not running"**: Start tmux with `tmux new-session`
+**"Config file not found"**: Use `tmux-tools config create`
 
 ## Development
 
-### Design Philosophy
+The modular architecture makes extension straightforward. Core logic lives in `lib/` modules with separated display formatting. The configuration system supports new options and the color theming system accommodates new themes.
 
-The toolkit follows these principles:
-
-- **Space Efficiency**: Compact layouts maximize screen real estate
-- **Device Awareness**: Width column reveals connection type
-- **Smart Defaults**: Hide rarely-needed information unless requested
-- **Memorable Names**: City/mammal scheme avoids conflicts naturally
-- **Backward Compatibility**: Preserve existing workflows
-
-For detailed design rationale, see [docs/design-principles.md](docs/design-principles.md).
-
-### Contributing
-
-The modular architecture makes the codebase easy to extend:
-
-- Core logic in `lib/` modules
-- Display formatting separated from data logic
-- Configuration system supports new options
-- Color theming system ready for new themes
-
-See [docs/roadmap.md](docs/roadmap.md) for planned enhancements.
+See [docs/design-principles.md](docs/design-principles.md) for design rationale and [docs/roadmap.md](docs/roadmap.md) for planned enhancements.
 
 ## License
 

@@ -27,7 +27,8 @@
       "Bash(./tmux-tools rename:*)",
       "Bash(git commit:*)",
       "Bash(find:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:gist.github.com)"
     ],
     "deny": [],
     "ask": []
