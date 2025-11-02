@@ -236,7 +236,7 @@ tmux-tools/
 - tmux-overview         # Backward compatible script
 ```
 
-For detailed technical information, see [docs/architecture.md](docs/architecture.md).
+For detailed technical information, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Scripting and Integration
 
@@ -297,7 +297,7 @@ Optional: **jq** for JSON processing, **YAML tools** for advanced configuration 
 
 The modular architecture makes extension straightforward. Core logic lives in `lib/` modules with separated display formatting. The configuration system supports new options and the color theming system accommodates new themes.
 
-See [docs/design-principles.md](docs/design-principles.md) for design rationale and [docs/roadmap.md](docs/roadmap.md) for planned enhancements.
+See [docs/DESIGN-PRINCIPLES.md](docs/DESIGN-PRINCIPLES.md) for design rationale and [docs/ROADMAP.md](docs/ROADMAP.md) for planned enhancements.
 
 ## License
 
