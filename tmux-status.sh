@@ -97,14 +97,12 @@ source "$SCRIPT_DIR/lib/tmux_config.sh"
 # Load configuration
 load_config
 
-# Initialize colors based on configuration
-init_colors "$(get_config_value "theme")"
-
 # Parse arguments
 no_rename=true  # Default: no renaming
 rename_sessions=false
 rename_windows=false
 show_pid=false
+theme_override=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -117,6 +115,7 @@ USAGE:
 
 OPTIONS:
   --help, -h          Show this help message
+  --theme THEME       Color theme (default, vibrant, subtle, monochrome, none)
   --no-rename         Skip all session renaming (default)
   --rename-auto       Rename non-city sessions and non-mammal windows (both)
   --rename-sessions   Rename ALL sessions to random city names
@@ -126,11 +125,20 @@ OPTIONS:
 EXAMPLES:
   ./tmux-status.sh                    # Show compact status
   ./tmux-status.sh --show-pid         # Show status with PID and path details
+  ./tmux-status.sh --theme vibrant    # Use vibrant color theme
   ./tmux-status.sh --rename-auto      # Rename non-city/non-mammal names
   ./tmux-status.sh --rename-sessions  # Rename all sessions
   ./tmux-status.sh --rename-windows   # Rename all windows to mammals
 EOF
       exit 0
+      ;;
+    --theme)
+      if [[ -z "$2" || "$2" == --* ]]; then
+        echo "Error: --theme requires a theme name" >&2
+        exit 1
+      fi
+      theme_override="$2"
+      shift 2
       ;;
     --no-rename)
       no_rename=true
@@ -161,6 +169,13 @@ EOF
       ;;
   esac
 done
+
+# Initialize colors based on configuration or override
+if [[ -n "$theme_override" ]]; then
+  init_colors "$theme_override"
+else
+  init_colors "$(get_config_value "theme")"
+fi
 
 # Check tmux availability and status
 if ! check_tmux_available; then
