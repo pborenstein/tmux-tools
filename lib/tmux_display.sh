@@ -30,11 +30,11 @@ pad_colored() {
     local visible_len=${#string}
     local padding=$((width - visible_len))
 
-    # Build padded colored string
+    # Build padded colored string (use %b to interpret escape sequences)
     if [[ $padding -gt 0 ]]; then
-      printf "%s%s%s%*s" "$color" "$string" "$reset_color" "$padding" ""
+      printf "%b%s%b%*s" "$color" "$string" "$reset_color" "$padding" ""
     else
-      printf "%s%s%s" "$color" "$string" "$reset_color"
+      printf "%b%s%b" "$color" "$string" "$reset_color"
     fi
   fi
 }
@@ -117,13 +117,14 @@ print_status_row() {
     formatted_row+=$(printf "%-5s" "$pid")
     formatted_row+="  "
     if [[ -n "$gray_color" ]]; then
-      formatted_row+="${gray_color}${path}${reset_color}"
+      # Use printf %b to interpret escape sequences
+      formatted_row+=$(printf "%b%s%b" "$gray_color" "$path" "$reset_color")
     else
       formatted_row+="$path"
     fi
   fi
 
-  echo "$formatted_row"
+  printf "%b\n" "$formatted_row"
 }
 
 # Print header for tmux-status display
