@@ -13,6 +13,32 @@
 #
 #=============================================================================
 
+# Pad a colored string to a specific width
+# Args: string width color reset_color
+# Returns: padded colored string
+pad_colored() {
+  local string="$1"
+  local width="$2"
+  local color="$3"
+  local reset_color="$4"
+
+  if [[ -z "$color" ]]; then
+    # No color, use regular printf
+    printf "%-${width}s" "$string"
+  else
+    # Calculate padding needed (width - visible string length)
+    local visible_len=${#string}
+    local padding=$((width - visible_len))
+
+    # Build padded colored string
+    if [[ $padding -gt 0 ]]; then
+      printf "%s%s%s%*s" "$color" "$string" "$reset_color" "$padding" ""
+    else
+      printf "%s%s%s" "$color" "$string" "$reset_color"
+    fi
+  fi
+}
+
 # Print formatted table row for tmux-status display
 # Args: attachment_indicator session_display win_index window_display pane_index cmd width_display [pid] [path]
 print_status_row() {
@@ -26,17 +52,78 @@ print_status_row() {
   local pid="$8"
   local path="$9"
 
-  if [[ -n "$pid" && -n "$path" ]]; then
-    # Detailed output with PID and path
-    printf "%-1s %-13s %-3s  %-8s  %-1s  %-7s  %-3s  %-5s  %s\n" \
-      "$attachment_indicator" "$session_display" "$win_index" "$window_display" \
-      "$pane_index" "$cmd" "$width_display" "$pid" "$path"
-  else
-    # Compact output
-    printf "%-1s %-13s %-3s  %-8s  %-1s  %-7s  %-3s\n" \
-      "$attachment_indicator" "$session_display" "$win_index" "$window_display" \
-      "$pane_index" "$cmd" "$width_display"
+  # Determine colors
+  local active_color=""
+  local session_color=""
+  local highlight_color=""
+  local info_color=""
+  local gray_color=""
+  local reset_color=""
+
+  if colors_supported; then
+    active_color=$(get_color "active")
+    session_color=$(get_color "session")
+    highlight_color=$(get_color "highlight")
+    info_color=$(get_color "info")
+    gray_color=$(get_color "gray")
+    reset_color=$(get_color "reset")
   fi
+
+  # Build formatted row with proper padding for colored fields
+  local formatted_row=""
+
+  # Attachment indicator (1 char)
+  if [[ -n "$attachment_indicator" && "$attachment_indicator" != " " ]]; then
+    formatted_row+=$(pad_colored "$attachment_indicator" 1 "$active_color" "$reset_color")
+  else
+    formatted_row+=$(printf "%-1s" "$attachment_indicator")
+  fi
+  formatted_row+=" "
+
+  # Session display (13 chars)
+  if [[ -n "$session_display" ]]; then
+    formatted_row+=$(pad_colored "$session_display" 13 "$session_color" "$reset_color")
+  else
+    formatted_row+=$(printf "%-13s" "")
+  fi
+  formatted_row+=" "
+
+  # Window index (3 chars)
+  formatted_row+=$(printf "%-3s" "$win_index")
+  formatted_row+="  "
+
+  # Window display (8 chars)
+  if [[ -n "$window_display" ]]; then
+    formatted_row+=$(pad_colored "$window_display" 8 "$highlight_color" "$reset_color")
+  else
+    formatted_row+=$(printf "%-8s" "")
+  fi
+  formatted_row+="  "
+
+  # Pane index (1 char)
+  formatted_row+=$(printf "%-1s" "$pane_index")
+  formatted_row+="  "
+
+  # Command (7 chars)
+  formatted_row+=$(pad_colored "$cmd" 7 "$info_color" "$reset_color")
+  formatted_row+="  "
+
+  # Width display (3 chars)
+  formatted_row+=$(printf "%-3s" "$width_display")
+
+  # Optional PID and path
+  if [[ -n "$pid" && -n "$path" ]]; then
+    formatted_row+="  "
+    formatted_row+=$(printf "%-5s" "$pid")
+    formatted_row+="  "
+    if [[ -n "$gray_color" ]]; then
+      formatted_row+="${gray_color}${path}${reset_color}"
+    else
+      formatted_row+="$path"
+    fi
+  fi
+
+  echo "$formatted_row"
 }
 
 # Print header for tmux-status display
