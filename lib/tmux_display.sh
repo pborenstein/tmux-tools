@@ -92,11 +92,11 @@ print_status_row() {
   formatted_row+=$(printf "%-3s" "$win_index")
   formatted_row+="  "
 
-  # Window display (8 chars)
+  # Window display (20 chars)
   if [[ -n "$window_display" ]]; then
-    formatted_row+=$(pad_colored "$window_display" 8 "$highlight_color" "$reset_color")
+    formatted_row+=$(pad_colored "$window_display" 20 "$highlight_color" "$reset_color")
   else
-    formatted_row+=$(printf "%-8s" "")
+    formatted_row+=$(printf "%-20s" "")
   fi
   formatted_row+="  "
 
@@ -136,11 +136,11 @@ print_status_header() {
   echo
 
   if [[ "$show_pid" = true ]]; then
-    echo "  session       win  name      p  cmd      w    pid    path"
-    echo "- -------       ---  --------  -  -------  ---  -----  ----"
+    echo "  session       win  name                  p  cmd      w    pid    path"
+    echo "- -------       ---  --------------------  -  -------  ---  -----  ----"
   else
-    echo "  session       win  name      p  cmd      w"
-    echo "- -------       ---  --------  -  -------  ---"
+    echo "  session       win  name                  p  cmd      w"
+    echo "- -------       ---  --------------------  -  -------  ---"
   fi
 }
 
