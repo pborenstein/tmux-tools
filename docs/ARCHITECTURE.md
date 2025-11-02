@@ -1,474 +1,335 @@
-# Architecture Documentation
+# Architecture
 
 ## Overview
 
-This document describes the technical architecture of tmux-tools following the comprehensive refactoring that transformed the original monolithic scripts into a modular, configurable, and unified toolkit.
+tmux-tools uses a modular library architecture with separated concerns:
 
-## Refactoring Objectives
-
-The refactoring addressed three primary goals:
-
-### 1. Shared Library Extraction
-- **Status**: Complete
-- **Impact**: Eliminated code duplication and created foundation for future enhancements
-- **Result**: Modular library structure in `lib/` directory
-
-### 2. Configuration File Support
-- **Status**: Complete
-- **Impact**: YAML configuration with custom name pools and persistent settings
-- **Result**: Flexible configuration system with multiple file locations
-
-### 3. Unified Command Interface
-- **Status**: Complete
-- **Impact**: Single entry point with consistent user experience
-- **Result**: `tmux-tools` command with subcommands and unified options
-
-## Architecture Comparison
-
-### Before Refactoring
 ```
 tmux-tools/
-- tmux-status.sh    (398 lines, monolithic)
-- tmux-overview     (369 lines, function-based)
+├── lib/
+│   ├── tmux_core.sh      # Core tmux operations
+│   ├── tmux_display.sh   # Display formatting
+│   ├── tmux_colors.sh    # Color theming
+│   └── tmux_config.sh    # Configuration handling
+├── tmux-tools            # Unified command interface
+├── tmux-status.sh        # Backward compatible script
+└── tmux-overview         # Backward compatible script
 ```
 
-### After Refactoring
+### Component Relationships
+
 ```
-tmux-tools/
-- lib/
-    - tmux_core.sh      # Core tmux operations
-    - tmux_display.sh   # Display formatting utilities
-    - tmux_colors.sh    # Color management and theming
-    - tmux_config.sh    # Configuration handling
-- tmux-tools            # Unified command interface
-- tmux-status.sh        # Refactored (backward compatible)
-- tmux-overview         # Refactored (backward compatible)
-- ~/.tmux-tools.yaml    # Configuration file
+┌─────────────────────────────────────────────────────────────┐
+│                     User Interface Layer                     │
+├─────────────────────────────────────────────────────────────┤
+│  tmux-tools (unified CLI)    tmux-status.sh  tmux-overview  │
+│       │                              │              │        │
+│       └──────────────┬───────────────┴──────────────┘        │
+└──────────────────────┼──────────────────────────────────────┘
+                       │ sources all libraries
+         ┌─────────────┼─────────────┬──────────────┐
+         │             │             │              │
+         ▼             ▼             ▼              ▼
+   ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+   │  Core   │  │ Display  │  │  Colors  │  │  Config  │
+   │  195    │  │   225    │  │   205    │  │   284    │
+   │  lines  │  │  lines   │  │  lines   │  │  lines   │
+   └────┬────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘
+        │            │             │             │
+        │ queries    │ formats     │ colorizes   │ loads
+        │            │             │             │
+        ▼            ▼             ▼             ▼
+   ┌─────────────────────────────────────────────────────┐
+   │              tmux Server & Config File              │
+   │   list-sessions  list-windows  list-panes  etc.     │
+   │              ~/.tmux-tools.yaml                     │
+   └─────────────────────────────────────────────────────┘
 ```
 
 ## Library Components
 
 ### tmux_core.sh
 
-**Purpose**: Core tmux operations and utilities
+Core tmux operations and data retrieval:
 
-**Key Functions**:
+**Data Retrieval Pipeline**:
 
-- `check_tmux_available()` - Verify tmux installation and binary availability
-- `check_tmux_running()` - Validate tmux server status and session existence
-- `get_session_data()` - Retrieve session information with custom format strings
-- `get_window_data()` - Get window data for specified sessions
-- `get_pane_data()` - Extract pane information with process and path details
-- `get_client_data()` - Client connection details including terminal dimensions
-- `get_attachment_indicator()` - Session attachment status with visual indicators
-- `rename_session()` / `rename_window()` - Safe renaming operations with conflict resolution
-- `format_timestamp()` / `format_elapsed_time()` - Time formatting utilities
+```
+User runs: tmux-tools status
+         │
+         ▼
+  ┌──────────────┐
+  │ check_tmux_  │  Verify tmux installed
+  │  available() │
+  └──────┬───────┘
+         ▼
+  ┌──────────────┐
+  │ check_tmux_  │  Verify server running
+  │  running()   │
+  └──────┬───────┘
+         │
+    ┌────┴────┬──────────────┬─────────────┐
+    │         │              │             │
+    ▼         ▼              ▼             ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐ ┌──────────┐
+│ get_    │ │ get_    │ │ get_    │ │ get_     │
+│session_ │ │window_  │ │ pane_   │ │ client_  │
+│ data()  │ │ data()  │ │ data()  │ │  data()  │
+└────┬────┘ └────┬────┘ └────┬────┘ └────┬─────┘
+     │           │           │           │
+     │ tmux list-sessions    │           │
+     │           │ tmux list-windows     │
+     │           │           │ tmux list-panes
+     │           │           │           │ tmux list-clients
+     │           │           │           │
+     └───────────┴───────────┴───────────┘
+                  │
+                  ▼
+          Formatted data returned
+          to display layer
+```
 
-**Design Principles**:
-- Centralized tmux data access
-- Consistent error handling patterns
-- Format string parameterization
-- Safe parameter expansion
+**Functions**:
+- `check_tmux_available()` / `check_tmux_running()` - Validation
+- `get_session_data()` / `get_window_data()` / `get_pane_data()` - Data retrieval
+- `get_client_data()` - Terminal dimensions and device identification
+- `rename_session()` / `rename_window()` - Safe renaming with conflict resolution
 
 ### tmux_display.sh
 
-**Purpose**: Display formatting utilities for consistent output across commands
+Display formatting and layout:
 
-**Key Functions**:
-
-- `print_status_row()` - Formatted table rows for status display with alignment
-- `print_status_header()` - Table headers with conditional PID column display
-- `format_session_display()` - Session name display logic with grouping
-- `format_window_display()` - Window name display logic with first-pane rules
-- `format_attachment_display()` - Attachment indicator formatting with themes
-- `print_overview_row()` - Overview display with background colors and tree structure
-- `print_detailed_overview_row()` - Detailed pane information with paths
-- `get_window_indicator()` / `get_session_indicator()` - Status symbols based on state
-
-**Layout Management**:
-- Column width consistency
-- Visual grouping through spacing
-- Conditional detail display
-- Theme-aware formatting
+- `print_status_row()` / `print_status_header()` - Tabular formatting
+- `format_session_display()` / `format_window_display()` - Visual grouping
+- `print_overview_row()` - Tree structure rendering
 
 ### tmux_colors.sh
 
-**Purpose**: Color management and theming system
+Theme management:
 
-**Features**:
+**Themes**: default, vibrant, subtle, monochrome, none
 
-- **Multiple Themes**: default, vibrant, subtle, monochrome, none
-- **Environment Detection**: `TMUX_TOOLS_THEME`, `NO_COLOR` environment variables
-- **Terminal Capability Detection**: Automatic color support detection
-- **Convenience Functions**: Common color operations and combinations
-- **Theme-aware Retrieval**: Dynamic color code generation
+**Theme Selection Flow**:
 
-**Color Themes**:
+```
+      Command execution starts
+              │
+              ▼
+       ┌──────────────┐
+       │ NO_COLOR set?│ → yes → Disable all colors, done
+       └──────┬───────┘
+              │ no
+              ▼
+       ┌──────────────┐
+       │ Get theme    │  1. TMUX_TOOLS_THEME env var
+       │   setting    │  2. Config file display.theme
+       │              │  3. Default: "default"
+       └──────┬───────┘
+              │
+              ▼
+       ┌──────────────┐
+       │ init_colors()│
+       └──────┬───────┘
+              │
+     ┌────────┴────────┬─────────┬──────────┬──────────┐
+     │                 │         │          │          │
+     ▼                 ▼         ▼          ▼          ▼
+┌─────────┐      ┌─────────┐ ┌────────┐ ┌────────┐ ┌──────┐
+│ default │      │ vibrant │ │ subtle │ │ mono   │ │ none │
+│ Balanced│      │ Bright  │ │ Muted  │ │ Single │ │  No  │
+│ colors  │      │ colors  │ │ colors │ │ color  │ │colors│
+└────┬────┘      └────┬────┘ └───┬────┘ └───┬────┘ └──┬───┘
+     │                │          │          │         │
+     └────────────────┴──────────┴──────────┴─────────┘
+                       │
+                       ▼
+          Set SESSION_COLOR, WINDOW_COLOR,
+          PANE_COLOR, BACKGROUND_COLOR, etc.
+```
 
-| Theme | Use Case | Characteristics |
-|-------|----------|----------------|
-| **default** | General use | Balanced colors for broad compatibility |
-| **vibrant** | High-contrast displays | Bright colors for enhanced visibility |
-| **subtle** | Professional environments | Muted colors for low-distraction use |
-| **monochrome** | Accessibility | Single color for color-blind accessibility |
-| **none** | Scripting/automation | No colors for clean text processing |
+**Environment**: `TMUX_TOOLS_THEME`, `NO_COLOR`
 
-**Implementation**:
+**Usage**:
 ```bash
-# Theme initialization
 init_colors "$(get_config_value "theme")"
-
-# Usage patterns
-colorize_session "oslo"           # Theme-aware session coloring
-get_color "background"            # Raw color codes for printf
+colorize_session "oslo"
 ```
 
 ### tmux_config.sh
 
-**Purpose**: Configuration handling with YAML support and fallback mechanisms
+YAML configuration parsing:
 
-**Configuration File Search Order**:
+**Configuration Loading Flow**:
+
+```
+      Start: load_config()
+              │
+              ▼
+       ┌──────────────┐
+       │ Check env    │  NO_COLOR set? → disable colors
+       │ variables    │  TMUX_TOOLS_THEME → override theme
+       └──────┬───────┘  TMUX_TOOLS_*_POOL → override pools
+              │
+              ▼
+       ┌──────────────┐
+       │ Search for   │  1. ~/.tmux-tools.yaml
+       │ config file  │  2. ~/.tmux-tools.yml
+       │ (6 locations)│  3. ~/.config/tmux-tools/config.yaml
+       └──────┬───────┘  4. ~/.config/tmux-tools/config.yml
+              │          5. ./tmux-tools.yaml
+        ┌─────┴─────┐   6. ./tmux-tools.yml
+        │           │
+     Found        Not Found
+        │           │
+        ▼           ▼
+  ┌─────────┐  ┌─────────┐
+  │  Parse  │  │  Use    │
+  │  YAML   │  │ Defaults│
+  └────┬────┘  └────┬────┘
+       │            │
+       └─────┬──────┘
+             ▼
+      ┌──────────────┐
+      │ Apply config │ → Theme, name pools, display options
+      │   values     │
+      └──────────────┘
+```
+
+**Search order**:
 1. `~/.tmux-tools.yaml`
 2. `~/.tmux-tools.yml`
 3. `~/.config/tmux-tools/config.yaml`
 4. `~/.config/tmux-tools/config.yml`
-5. `./tmux-tools.yaml` (project-local)
-6. `./tmux-tools.yml` (project-local)
+5. `./tmux-tools.yaml`
+6. `./tmux-tools.yml`
 
-**Key Functions**:
+**Functions**:
+- `load_config()` - Parse YAML configuration
+- `get_session_names()` / `get_window_names()` - Name pool retrieval
 
-- `load_config()` - Load and parse configuration file with error handling
-- `parse_yaml_value()` - Simple YAML key-value parsing with type detection
-- `parse_yaml_array()` - YAML array parsing for name lists and collections
-- `get_session_names()` / `get_window_names()` - Name pool retrieval with fallbacks
-- `create_example_config()` - Generate example configuration with documentation
+## Configuration
 
-**YAML Parser Implementation**:
-
-The configuration system uses a lightweight regex-based YAML parser that handles:
-- Key-value pairs with quoted and unquoted values
-- Inline comment stripping
-- Nested sections with proper indentation
-- Array parsing for custom name lists
-- Type conversion for boolean and numeric values
-
-## Configuration System
-
-### Configuration Schema
+Example `~/.tmux-tools.yaml`:
 
 ```yaml
-# tmux-tools configuration file
 display:
-  theme: "default"              # Color theme selection
-  attachment_indicator: "*"     # Character for attached session indicator
-  colors_enabled: true          # Global color enable/disable
+  theme: "default"
+  attachment_indicator: "*"
 
 naming:
-  session_pool: "cities"        # Naming pool selection: cities, custom
-  window_pool: "mammals"        # Naming pool selection: mammals, custom
+  session_pool: "cities"
+  window_pool: "mammals"
 
-  # Custom name pools (used when pool is "custom")
   custom_sessions:
     - "dev"
     - "work"
-    - "personal"
-    - "testing"
 
   custom_windows:
     - "editor"
     - "terminal"
-    - "browser"
-    - "docs"
-
-output:
-  default_format: "compact"     # Default display format: compact, detailed
-  show_timestamps: true         # Include timestamps in headers
-  group_sessions: true          # Group windows by session in display
 ```
 
-### Environment Variable Integration
+**Environment overrides**:
 
-| Variable | Default | Override Behavior |
-|----------|---------|-------------------|
-| `TMUX_TOOLS_THEME` | "default" | Overrides config file theme setting |
-| `TMUX_TOOLS_SESSION_POOL` | "cities" | Overrides session naming pool |
-| `TMUX_TOOLS_WINDOW_POOL` | "mammals" | Overrides window naming pool |
-| `TMUX_TOOLS_ATTACHMENT_INDICATOR` | "*" | Custom attachment symbol |
-| `TMUX_TOOLS_DEFAULT_FORMAT` | "compact" | Default display format |
-| `NO_COLOR` | - | Disables all color output when set |
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `TMUX_TOOLS_THEME` | "default" | Override theme |
+| `TMUX_TOOLS_SESSION_POOL` | "cities" | Override session names |
+| `TMUX_TOOLS_WINDOW_POOL` | "mammals" | Override window names |
+| `NO_COLOR` | - | Disable colors |
 
-## Unified Command Interface
+## Command Dispatch
 
-### Command Dispatch Architecture
+The `tmux-tools` script routes commands to implementations:
 
-The `tmux-tools` script implements a command dispatch pattern:
+### Command Routing Flow
 
-```bash
-tmux-tools <command> [options]
+```
+User: tmux-tools status --show-pid
+              │
+              ▼
+       ┌─────────────┐
+       │  tmux-tools │  Parse command and options
+       │ dispatcher  │
+       └──────┬──────┘
+              │
+        ┌─────┴─────┬──────────┬────────────┐
+        │           │          │            │
+        ▼           ▼          ▼            ▼
+    ┌────────┐ ┌────────┐ ┌────────┐ ┌──────────┐
+    │ status │ │overview│ │ rename │ │  config  │
+    │  exec  │ │  exec  │ │internal│ │ internal │
+    │   ↓    │ │   ↓    │ │        │ │          │
+    │ tmux-  │ │ tmux-  │ └────────┘ └──────────┘
+    │status  │ │overview│
+    │  .sh   │ │        │
+    └────────┘ └────────┘
 ```
 
-**Command Structure**:
+| Command | Target | Implementation |
+|---------|--------|----------------|
+| `status` | tmux-status.sh | Exec to script |
+| `overview` | tmux-overview | Exec to script |
+| `rename` | Internal | Uses lib functions |
+| `config` | Internal | Uses lib functions |
 
-| Command | Target Script | Function | Options Passed |
-|---------|---------------|----------|----------------|
-| `status` | tmux-status.sh | Tabular display | --show-pid, --rename-* |
-| `overview` | tmux-overview | Tree overview | --detailed, --json, -s |
-| `rename` | Internal | Renaming operations | sessions, windows, auto |
-| `config` | Internal | Configuration management | show, create, edit |
-| `help` | Internal | Help display | Command-specific help |
-| `version` | Internal | Version information | - |
-
-**Implementation Pattern**:
 ```bash
 case "$command" in
   "status")
     exec "$SCRIPT_DIR/tmux-status.sh" "$@"
     ;;
-  "overview")
-    exec "$SCRIPT_DIR/tmux-overview" "$@"
-    ;;
   "rename")
-    # Internal implementation using lib functions
+    # Internal implementation
     ;;
 esac
 ```
 
-### Backward Compatibility
+## Backward Compatibility
 
-The refactoring maintains 100% backward compatibility through:
+Original scripts work unchanged:
 
-**Script Preservation**: Original scripts maintain their full functionality
 ```bash
-./tmux-status.sh                    # Works unchanged
-./tmux-status.sh --rename-auto      # All original options preserved
-./tmux-overview --detailed          # All original options preserved
+./tmux-status.sh              # Same as tmux-tools status
+./tmux-overview --detailed    # Same as tmux-tools overview --detailed
 ```
 
-**Library Integration**: Original scripts now use shared libraries while maintaining their interfaces
-```bash
-# tmux-status.sh now sources lib/tmux_core.sh but behaves identically
-source "$SCRIPT_DIR/lib/tmux_core.sh"
-source "$SCRIPT_DIR/lib/tmux_display.sh"
-```
+Scripts now source lib files but maintain identical interfaces.
 
-**Migration Path**: Users can adopt the unified interface gradually
-```bash
-# Migration examples
-./tmux-status.sh              → tmux-tools status
-./tmux-status.sh --show-pid   → tmux-tools status --show-pid
-./tmux-overview --json        → tmux-tools overview --json
-```
+## Implementation Notes
 
-## Technical Implementation Details
+### Parameter Handling
 
-### Parameter Handling Fix
-
-**Problem Identified**: Bash parameter expansion with tmux format strings caused syntax conflicts
+Bash parameter expansion conflicts with tmux format strings. Use explicit checks:
 
 ```bash
-# This pattern caused issues with tmux format syntax
-local format="${2:-#{session_name}|#{window_index}}"
-# Resulted in malformed: #{session_name|#{window_index}}
-```
+# Avoid
+local format="${2:-#{session_name}}"
 
-**Solution Implemented**: Explicit parameter checking with conditional assignment
-
-```bash
+# Use
 local format="${2:-}"
 if [[ -z "$format" ]]; then
-  format="#{session_name}|#{window_index}"
+  format="#{session_name}"
 fi
 ```
 
-### Error Handling Improvements
+### Error Handling
 
-**Standardized Patterns**:
-- Consistent tmux server validation across all operations
-- Graceful fallbacks for missing or malformed data
-- Contextual error messages with actionable guidance
-- Unbound variable protection for bash strict mode
+Standardized validation:
 
-**Example Implementation**:
 ```bash
 check_tmux_available() {
   if ! command -v tmux >/dev/null 2>&1; then
-    echo "Error: tmux not found. Please install tmux." >&2
-    return 1
-  fi
-}
-
-check_tmux_running() {
-  if ! tmux has-session 2>/dev/null; then
-    echo "Error: No tmux sessions found. Start tmux with: tmux new-session" >&2
+    echo "Error: tmux not found" >&2
     return 1
   fi
 }
 ```
 
-### Color System Implementation
+## Extension Points
 
-**Theme-aware Architecture**:
-```bash
-# Color initialization with theme detection
-init_colors() {
-  local theme="${1:-default}"
+The architecture supports:
 
-  case "$theme" in
-    "vibrant")
-      SESSION_COLOR="$BRIGHT_BLUE"
-      WINDOW_COLOR="$BRIGHT_YELLOW"
-      ;;
-    "subtle")
-      SESSION_COLOR="$DIM_BLUE"
-      WINDOW_COLOR="$DIM_YELLOW"
-      ;;
-    # Additional themes...
-  esac
-}
-
-# Usage with automatic theming
-colorize_session() {
-  local session="$1"
-  printf "${SESSION_COLOR}%s${RESET_COLOR}" "$session"
-}
-```
-
-## Code Quality Improvements
-
-### Quantitative Metrics
-
-| Aspect | tmux-status.sh | tmux-overview | After Refactoring |
-|--------|----------------|---------------|-------------------|
-| **Modularity** | 6/10 | 8/10 | 9/10 |
-| **Error Handling** | 7/10 | 8/10 | 9/10 |
-| **Code Reuse** | 4/10 | 7/10 | 9/10 |
-| **Configurability** | 5/10 | 6/10 | 9/10 |
-| **Testability** | 3/10 | 6/10 | 8/10 |
-
-### Specific Improvements
-
-**Code Duplication Elimination**:
-- Attachment indicator logic extracted and centralized
-- Session/window/pane data retrieval unified across scripts
-- Error handling patterns standardized with reusable functions
-- Color management centralized with theme system
-
-**Enhanced Modularity**:
-- Functions separated from execution logic for better testing
-- Clear parameter interfaces with documented contracts
-- Isolated functionality enables independent unit testing
-- Mock-friendly data retrieval for development testing
-
-**Improved Configurability**:
-- YAML-based configuration with multiple file locations
-- Environment variable overrides for temporary customization
-- Custom naming pools for personalized workflows
-- Theme system for display preferences
-
-## Testing and Validation
-
-### Testing Methodology
-
-**Manual Testing Completed**:
-
-1. **Basic Functionality**: All original features work unchanged
-2. **Unified Interface**: All new commands functional with proper option passing
-3. **Configuration Loading**: YAML parsing handles all supported syntax
-4. **Backward Compatibility**: Original scripts maintain behavior exactly
-5. **Error Handling**: Graceful degradation with helpful error messages
-6. **Color Themes**: All themes render correctly across terminal types
-7. **Parameter Validation**: Handles missing/malformed parameters safely
-
-### Known Limitations
-
-**Minor Issues Identified**:
-
-1. **Color Escape Sequences**: Minor display artifacts in some terminal configurations (non-critical)
-2. **YAML Parser Scope**: Only supports basic key-value and array syntax (sufficient for current requirements)
-3. **Column Width**: Very long names may break table alignment (design limitation)
-
-**Mitigation Strategies**:
-- Color issues resolved through `NO_COLOR` environment variable
-- YAML parser extensible for advanced syntax if needed
-- Column width issues documented in user guidance
-
-## Future Architecture Considerations
-
-### Extension Points
-
-The modular architecture enables several planned enhancements:
-
-**Ready for Implementation**:
-- **ASCII Art Mode**: Add display functions to tmux_display.sh
-- **Export Formats**: Extend output functions with new format handlers
-- **Additional Themes**: Color system ready for new theme definitions
-- **Session Filtering**: Core functions already support filtering parameters
-
-**Architecture Supports**:
-- **Interactive TUI Mode**: Can be built separately from core logic
-- **Plugin Architecture**: Extensible name generators through configuration
-- **AI-powered Features**: Context-aware naming through configuration hooks
-- **Session Templates**: YAML-based template system using existing config infrastructure
-
-### Scalability Considerations
-
-**Current Architecture Strengths**:
-- Library separation enables independent module updates
-- Configuration system scales to additional options
-- Color theming system ready for accessibility enhancements
-- Command dispatch pattern supports new subcommands
-
-**Potential Limitations**:
-- Shell-based implementation may hit performance limits with very large session counts
-- YAML parser may need replacement for complex configuration requirements
-- File-based configuration may need database backing for advanced features
-
-## Deployment Architecture
-
-### Current Packaging
-
-**Self-contained Structure**:
-- No external dependencies beyond tmux and bash
-- Single repository with unified file organization
-- Configuration files in standard locations
-- Library files co-located with executables
-
-**Distribution Ready**:
-- Homebrew formula structure compatible
-- APT package building ready with proper file layouts
-- NPM global installation pattern supported
-- Docker containerization with minimal base image
-
-### Installation Patterns
-
-```bash
-# Current direct usage
-git clone <repository>
-cd tmux-tools
-chmod +x tmux-tools tmux-status.sh tmux-overview
-
-# Future package manager integration
-brew install tmux-tools          # Homebrew
-apt install tmux-tools           # Debian/Ubuntu
-npm install -g tmux-tools        # NPM global
-docker run tmux-tools status     # Container usage
-```
-
-## Conclusion
-
-The refactoring successfully transforms tmux-tools from two independent scripts into a cohesive, extensible toolkit. The modular architecture eliminates code duplication, enables customization through configuration, and provides a unified interface while maintaining complete backward compatibility.
-
-Key architectural achievements:
-
-- **Modularity**: Clean separation of concerns across library modules
-- **Extensibility**: Configuration and theming systems ready for enhancement
-- **Compatibility**: Zero-impact migration path for existing users
-- **Quality**: Improved error handling, testing, and maintainability
-
-This foundation supports the full roadmap of planned features and positions tmux-tools as a comprehensive solution for tmux session management.
-
----
-
-*Architecture documented: September 27, 2025*
-*Refactoring Status: Complete*
-*Compatibility: 100% backward compatible*
+- New display formats in `tmux_display.sh`
+- Additional themes in `tmux_colors.sh`
+- New configuration options in `tmux_config.sh`
+- New commands in `tmux-tools` dispatch

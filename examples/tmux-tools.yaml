@@ -1,0 +1,124 @@
+# tmux-tools configuration file
+#
+# Location: ~/.tmux-tools.yaml (or see alternative locations below)
+#
+# Alternative locations (searched in order):
+#   1. ~/.tmux-tools.yaml
+#   2. ~/.tmux-tools.yml
+#   3. ~/.config/tmux-tools/config.yaml
+#   4. ~/.config/tmux-tools/config.yml
+#   5. ./tmux-tools.yaml (project-local)
+#
+# Environment variables override config file settings:
+#   TMUX_TOOLS_THEME              - Color theme
+#   TMUX_TOOLS_SESSION_POOL       - Session naming pool
+#   TMUX_TOOLS_WINDOW_POOL        - Window naming pool
+#   TMUX_TOOLS_ATTACHMENT_INDICATOR - Attachment symbol
+#   NO_COLOR                      - Disable all colors when set
+
+# Display settings
+display:
+  # Color theme selection
+  # Options: default, vibrant, subtle, monochrome, none
+  # - default: Balanced colors for general use
+  # - vibrant: Bright colors for high-contrast displays
+  # - subtle: Muted colors for professional environments
+  # - monochrome: Single color for accessibility
+  # - none: No colors for scripting/automation
+  theme: "default"
+
+  # Character to show for attached sessions
+  # Common options: "•" (bullet), "*" (asterisk), "▶" (arrow)
+  attachment_indicator: "•"
+
+  # Enable/disable color output globally
+  # Set to false to disable colors regardless of theme
+  colors_enabled: true
+
+# Naming settings
+naming:
+  # Session naming pool
+  # Options: cities, custom
+  # - cities: Rio, Oslo, Lima, Bern, Cairo, Tokyo, Paris, Milan, Berlin, Sydney, Boston, Madrid
+  # - custom: Use custom_sessions list below
+  session_pool: "cities"
+
+  # Window naming pool
+  # Options: mammals, custom
+  # - mammals: Cat, Dog, Fox, Bat, Elk, Bear, Lion, Wolf, Seal, Deer, Otter, Mouse
+  # - custom: Use custom_windows list below
+  window_pool: "mammals"
+
+  # Custom session names (used when session_pool: "custom")
+  # Provide your own list of session names
+  # Names should be short and memorable
+  custom_sessions:
+    - "dev"
+    - "work"
+    - "personal"
+    - "testing"
+    - "admin"
+    - "monitor"
+
+  # Custom window names (used when window_pool: "custom")
+  # Provide your own list of window names
+  # Names should be short (8 characters or less recommended)
+  custom_windows:
+    - "editor"
+    - "terminal"
+    - "browser"
+    - "docs"
+    - "logs"
+    - "build"
+
+# Output settings
+output:
+  # Default display format
+  # Options: compact, detailed
+  # - compact: Essential information only
+  # - detailed: Includes PIDs and full paths
+  default_format: "compact"
+
+  # Show timestamps in headers
+  # When true, displays current date/time at top of output
+  show_timestamps: true
+
+  # Group windows by session in display
+  # When true, visually groups windows under their sessions
+  group_sessions: true
+
+# Example configurations for specific use cases:
+
+# Configuration for color-blind accessibility:
+# display:
+#   theme: "monochrome"
+#   colors_enabled: true
+
+# Configuration for professional/minimal appearance:
+# display:
+#   theme: "subtle"
+#   attachment_indicator: "*"
+# output:
+#   show_timestamps: false
+
+# Configuration for scripting/automation:
+# display:
+#   theme: "none"
+#   colors_enabled: false
+# output:
+#   show_timestamps: false
+
+# Configuration for project-specific naming:
+# naming:
+#   session_pool: "custom"
+#   window_pool: "custom"
+#   custom_sessions:
+#     - "frontend"
+#     - "backend"
+#     - "database"
+#     - "devops"
+#   custom_windows:
+#     - "code"
+#     - "test"
+#     - "server"
+#     - "debug"
