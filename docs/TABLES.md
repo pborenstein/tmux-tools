@@ -40,10 +40,10 @@ Quick reference tables for common tmux operations organized by scope.
 
 | action              | key          | tmux command                          |
 | :------------------ | :----------- | :------------------------------------ |
-| select up           | ^B ↑         | select-pane -U                        |
-| select down         | ^B ↓         | select-pane -D                        |
-| select left         | ^B ←         | select-pane -L                        |
-| select right        | ^B →         | select-pane -R                        |
+| select up           | ^B ↑︎         | select-pane -U                        |
+| select down         | ^B ↓︎         | select-pane -D                        |
+| select left         | ^B ←︎         | select-pane -L                        |
+| select right        | ^B →︎         | select-pane -R                        |
 | select next         | ^B o         | select-pane -t :.+                    |
 | last                | ^B ;         | last-pane                             |
 | display numbers     | ^B q         | display-panes                         |
@@ -56,14 +56,14 @@ Quick reference tables for common tmux operations organized by scope.
 | swap down           | ^B }         | swap-pane -D                          |
 | rotate forward      | ^B ^O        | rotate-window                         |
 | rotate backward     | ^B M-o       | rotate-window -D                      |
-| resize up           | ^B M-↑       | resize-pane -U 5                      |
-| resize down         | ^B M-↓       | resize-pane -D 5                      |
-| resize left         | ^B M-←       | resize-pane -L 5                      |
-| resize right        | ^B M-→       | resize-pane -R 5                      |
-| resize up (1 line)  | ^B ^↑        | resize-pane -U                        |
-| resize down (1 line)| ^B ^↓        | resize-pane -D                        |
-| resize left (1 col) | ^B ^←        | resize-pane -L                        |
-| resize right (1 col)| ^B ^→        | resize-pane -R                        |
+| resize up           | ^B M-↑︎       | resize-pane -U 5                      |
+| resize down         | ^B M-↓︎       | resize-pane -D 5                      |
+| resize left         | ^B M-←︎       | resize-pane -L 5                      |
+| resize right        | ^B M-→︎       | resize-pane -R 5                      |
+| resize up (1 line)  | ^B ^↑︎        | resize-pane -U                        |
+| resize down (1 line)| ^B ^↓︎        | resize-pane -D                        |
+| resize left (1 col) | ^B ^←︎        | resize-pane -L                        |
+| resize right (1 col)| ^B ^→︎        | resize-pane -R                        |
 | join from window    |              | join-pane [-s src] [-t dst]           |
 | move to window      |              | move-pane [-s src] [-t dst]           |
 
@@ -111,7 +111,7 @@ Quick reference tables for common tmux operations organized by scope.
 
 - `^B` represents the default prefix key (Ctrl-B)
 - Some commands don't have default key bindings and must be typed at the command prompt (^B :)
-- Arrow keys are represented as: ↑ ↓ ← →
+- Arrow keys are represented as: ↑︎ ↓︎ ←︎ →︎
 - `M-` prefix means Meta/Alt key
 - `-r` flag on bind-key means the key is repeatable
 - Commands in parentheses in the "tmux command" column indicate the command is triggered via command-prompt

@@ -103,7 +103,7 @@ Additional window operations:
 | last    | ^B L           | ^B l           | ^B ;           |
 | new     | new-session    | ^B c           | split-window   |
 | choose  | ^B s           | ^B w           | —              |
-| select  | —              | ^B 0-9         | ^B ↑↓←→        |
+| select  | —              | ^B 0-9         | ^B ↑︎↓︎←︎→︎        |
 | rename  | ^B $           | ^B ,           | —              |
 | kill    | kill-session   | ^B &           | ^B x           |
 | detach  | ^B d           | —              | —              |
@@ -112,15 +112,15 @@ Additional window operations:
 | move    | —              | ^B .           | move-pane      |
 | swap    | —              | swap-window    | ^B { }         |
 | zoom    | —              | —              | ^B z           |
-| split ↕ | —              | ^B "           | —              |
-| split ↔ | —              | ^B %           | —              |
+| split ↕︎ | —              | ^B "           | —              |
+| split ↔︎ | —              | ^B %           | —              |
 | display | —              | —              | ^B q           |
 | mark    | —              | —              | ^B m           |
 | break   | —              | —              | ^B !           |
 
 **Notes:**
 - Commands without keys shown as bare commands (e.g., `new-session`, `kill-session`)
-- `^B ↑↓←→` means use arrow keys after prefix
+- `^B ↑︎↓︎←︎→︎` means use arrow keys after prefix
 - `^B { }` means two separate keys: { for swap up, } for swap down
 - Split creates new panes within windows
 
@@ -135,7 +135,7 @@ Additional window operations:
 | last    | ^B l           | ^B L           | ^B ;           | last    |
 | new     | ^B c           | new-session    | split-window   | new     |
 | choose  | ^B w           | ^B s           | —              | choose  |
-| select  | ^B 0-9         | —              | ^B ↑↓←→        | select  |
+| select  | ^B 0-9         | —              | ^B ↑︎↓︎←︎→︎        | select  |
 | rename  | ^B ,           | ^B $           | —              | rename  |
 | kill    | ^B &           | kill-session   | ^B x           | kill    |
 | detach  | —              | ^B d           | —              | detach  |
@@ -144,8 +144,8 @@ Additional window operations:
 | move    | ^B .           | —              | move-pane      | move    |
 | swap    | swap-window    | —              | ^B { }         | swap    |
 | zoom    | —              | —              | ^B z           | zoom    |
-| split ↕ | ^B "           | —              | —              | split ↕ |
-| split ↔ | ^B %           | —              | —              | split ↔ |
+| split ↕︎ | ^B "           | —              | —              | split ↕︎ |
+| split ↔︎ | ^B %           | —              | —              | split ↔︎ |
 | display | —              | —              | ^B q           | display |
 | mark    | —              | —              | ^B m           | mark    |
 | break   | —              | —              | ^B !           | break   |
@@ -161,7 +161,7 @@ Additional window operations:
 | ^B l           | ^B L           | last    | ^B ;           |
 | ^B c           | new-session    | new     | split-window   |
 | ^B w           | ^B s           | choose  | —              |
-| ^B 0-9         | —              | select  | ^B ↑↓←→        |
+| ^B 0-9         | —              | select  | ^B ↑︎↓︎←︎→︎        |
 | ^B ,           | ^B $           | rename  | —              |
 | ^B &           | kill-session   | kill    | ^B x           |
 | —              | ^B d           | detach  | —              |
@@ -170,8 +170,8 @@ Additional window operations:
 | ^B .           | —              | move    | move-pane      |
 | swap-window    | —              | swap    | ^B { }         |
 | —              | —              | zoom    | ^B z           |
-| ^B "           | —              | split ↕ | —              |
-| ^B %           | —              | split ↔ | —              |
+| ^B "           | —              | split ↕︎ | —              |
+| ^B %           | —              | split ↔︎ | —              |
 | —              | —              | display | ^B q           |
 | —              | —              | mark    | ^B m           |
 | —              | —              | break   | ^B !           |
@@ -189,12 +189,12 @@ Additional window operations:
 |         |                |                |                |         |
 | **CREATE** |             |                |                | |
 | new     | ^B c           | new-session    | split-window   | new     |
-| split ↕ | ^B "           | —              | —              | split ↕ |
-| split ↔ | ^B %           | —              | —              | split ↔ |
+| split ↕︎ | ^B "           | —              | —              | split ↕︎ |
+| split ↔︎ | ^B %           | —              | —              | split ↔︎ |
 |         |                |                |                |         |
 | **MANAGE** |             |                |                | |
 | choose  | ^B w           | ^B s           | —              | choose  |
-| select  | ^B 0-9         | —              | ^B ↑↓←→        | select  |
+| select  | ^B 0-9         | —              | ^B ↑︎↓︎←︎→︎        | select  |
 | rename  | ^B ,           | ^B $           | —              | rename  |
 | find    | ^B f           | —              | —              | find    |
 | display | —              | —              | ^B q           | display |
@@ -266,7 +266,7 @@ Additional window operations:
 | ⭐ | rename | ^B ,   | ^B $         | —       | rename | ⭐ |
 | ⭐ | detach | —      | ^B d         | —       | detach | ⭐ |
 |    |        |        |              |         |        |    |
-|    | select | ^B 0-9 | —            | ^B ↑↓←→ | select |    |
+|    | select | ^B 0-9 | —            | ^B ↑︎↓︎←︎→︎ | select |    |
 |    | find   | ^B f   | —            | —       | find   |    |
 |    | zoom   | —      | —            | ^B z    | zoom   |    |
 |    | swap   | swap-w | —            | ^B { }  | swap   |    |
@@ -279,7 +279,7 @@ Additional window operations:
 | :------ | :----- | :----- | :----- | :------ | :----- | :------ | :----- | :------ |
 | window  | ^B p   | ^B n   | ^B l   | ^B c    | ^B w   | ^B 0-9  | ^B ,   | ^B &    |
 | session | ^B (   | ^B )   | ^B L   | new-ses | ^B s   | —       | ^B $   | kill-se |
-| pane    | —      | —      | ^B ;   | ^B " %  | —      | ^B ↑↓←→ | —      | ^B x    |
+| pane    | —      | —      | ^B ;   | ^B " %  | —      | ^B ↑︎↓︎←︎→︎ | —      | ^B x    |
 
 | scope   | detach | attach  | find   | move   | swap   | zoom   | display | mark   | break  |
 | :------ | :----- | :------ | :----- | :----- | :----- | :----- | :------ | :----- | :----- |
@@ -300,7 +300,7 @@ Additional window operations:
 | last   | ^B l   | ^B L         | ^B ;   | last   |
 |        |        |              |        |        |
 | new    | ^B c   | new-session  | ^B " % | new    |
-| select | ^B 0-9 | —            | ^B ↑↓←→| select |
+| select | ^B 0-9 | —            | ^B ↑︎↓︎←︎→︎| select |
 | kill   | ^B &   | kill-session | ^B x   | kill   |
 
 ### Advanced Operations
@@ -334,7 +334,7 @@ Additional window operations:
 |         |                |                |                |         |
 | new     | ^B c           | new-session    | split-window   | new     |
 | choose  | ^B w           | ^B s           | —              | choose  |
-| select  | ^B 0-9         | —              | ^B ↑↓←→        | select  |
+| select  | ^B 0-9         | —              | ^B ↑︎↓︎←︎→︎        | select  |
 |         |                |                |                |         |
 | rename  | ^B ,           | ^B $           | —              | rename  |
 | kill    | ^B &           | kill-session   | ^B x           | kill    |
@@ -364,12 +364,12 @@ Additional window operations:
 |         |                |                |                |         |
 | **CREATE** |             |                |                | |
 | new     | ^B c<br>new-window | new-session | split-window | new |
-| split ↕ | ^B "<br>split-window | — | — | split ↕ |
-| split ↔ | ^B %<br>split-window -h | — | — | split ↔ |
+| split ↕︎ | ^B "<br>split-window | — | — | split ↕︎ |
+| split ↔︎ | ^B %<br>split-window -h | — | — | split ↔︎ |
 |         |                |                |                |         |
 | **MANAGE** |             |                |                | |
 | choose  | ^B w<br>choose-tree -Zw | ^B s<br>choose-tree -Zs | — | choose |
-| select  | ^B 0-9<br>select-window -t :=N | — | ^B ↑↓←→<br>select-pane | select |
+| select  | ^B 0-9<br>select-window -t :=N | — | ^B ↑︎↓︎←︎→︎<br>select-pane | select |
 | rename  | ^B ,<br>rename-window | ^B $<br>rename-session | — | rename |
 | find    | ^B f<br>find-window -Z | — | — | find |
 | display | — | — | ^B q<br>display-panes | display |
@@ -401,12 +401,12 @@ Additional window operations:
 |         |                |                |                |         |
 | **CREATE** |             |                |                | |
 | new     | ^B c (new-window) | new-session | split-window | new |
-| split ↕ | ^B " (split-window) | — | — | split ↕ |
-| split ↔ | ^B % (split-window -h) | — | — | split ↔ |
+| split ↕︎ | ^B " (split-window) | — | — | split ↕︎ |
+| split ↔︎ | ^B % (split-window -h) | — | — | split ↔︎ |
 |         |                |                |                |         |
 | **MANAGE** |             |                |                | |
 | choose  | ^B w (choose-tree -Zw) | ^B s (choose-tree -Zs) | — | choose |
-| select  | ^B 0-9 (select-window) | — | ^B ↑↓←→ (select-pane) | select |
+| select  | ^B 0-9 (select-window) | — | ^B ↑︎↓︎←︎→︎ (select-pane) | select |
 | rename  | ^B , (rename-window) | ^B $ (rename-session) | — | rename |
 | find    | ^B f (find-window) | — | — | find |
 | display | — | — | ^B q (display-panes) | display |
@@ -438,12 +438,12 @@ Additional window operations:
 |         |         |                 |         |                 |           |                |         |
 | **CREATE** |      |                 |         |                 |           |                | |
 | new     | ^B c    | new-window      | —       | new-session     | ^B " %    | split-window   | new     |
-| split ↕ | ^B "    | split-window    | —       | —               | —         | —              | split ↕ |
-| split ↔ | ^B %    | split-window -h | —       | —               | —         | —              | split ↔ |
+| split ↕︎ | ^B "    | split-window    | —       | —               | —         | —              | split ↕︎ |
+| split ↔︎ | ^B %    | split-window -h | —       | —               | —         | —              | split ↔︎ |
 |         |         |                 |         |                 |           |                |         |
 | **MANAGE** |      |                 |         |                 |           |                | |
 | choose  | ^B w    | choose-tree -Zw | ^B s    | choose-tree -Zs | —         | —              | choose  |
-| select  | ^B 0-9  | select-window   | —       | —               | ^B ↑↓←→   | select-pane    | select  |
+| select  | ^B 0-9  | select-window   | —       | —               | ^B ↑︎↓︎←︎→︎   | select-pane    | select  |
 | rename  | ^B ,    | rename-window   | ^B $    | rename-session  | —         | —              | rename  |
 | find    | ^B f    | find-window     | —       | —               | —         | —              | find    |
 | display | —       | —               | —       | —               | ^B q      | display-panes  | display |
@@ -475,12 +475,12 @@ Additional window operations:
 |         |                |                |                |         |
 | **CREATE** |             |                |                | |
 | new     | ^B c → new-window | new-session | split-window | new |
-| split ↕ | ^B " → split-window | — | — | split ↕ |
-| split ↔ | ^B % → split-window -h | — | — | split ↔ |
+| split ↕︎ | ^B " → split-window | — | — | split ↕︎ |
+| split ↔︎ | ^B % → split-window -h | — | — | split ↔︎ |
 |         |                |                |                |         |
 | **MANAGE** |             |                |                | |
 | choose  | ^B w → choose-tree -Zw | ^B s → choose-tree -Zs | — | choose |
-| select  | ^B 0-9 → select-window | — | ^B ↑↓←→ → select-pane | select |
+| select  | ^B 0-9 → select-window | — | ^B ↑︎↓︎←︎→︎ → select-pane | select |
 | rename  | ^B , → rename-window | ^B $ → rename-session | — | rename |
 | find    | ^B f → find-window | — | — | find |
 | display | — | — | ^B q → display-panes | display |
