@@ -94,6 +94,38 @@ Additional window operations:
 
 ---
 
+## Compact Action-First (All Scopes)
+
+| action  | session        | window         | pane           |
+| :------ | :------------- | :------------- | :------------- |
+| prev    | ^B (           | ^B p           | —              |
+| next    | ^B )           | ^B n           | —              |
+| last    | ^B L           | ^B l           | ^B ;           |
+| new     | new-session    | ^B c           | split-window   |
+| choose  | ^B s           | ^B w           | —              |
+| select  | —              | ^B 0-9         | ^B ↑↓←→        |
+| rename  | ^B $           | ^B ,           | —              |
+| kill    | kill-session   | ^B &           | ^B x           |
+| detach  | ^B d           | —              | —              |
+| attach  | attach-session | —              | —              |
+| find    | —              | ^B f           | —              |
+| move    | —              | ^B .           | move-pane      |
+| swap    | —              | swap-window    | ^B { }         |
+| zoom    | —              | —              | ^B z           |
+| split ↕ | —              | ^B "           | —              |
+| split ↔ | —              | ^B %           | —              |
+| display | —              | —              | ^B q           |
+| mark    | —              | —              | ^B m           |
+| break   | —              | —              | ^B !           |
+
+**Notes:**
+- Commands without keys shown as bare commands (e.g., `new-session`, `kill-session`)
+- `^B ↑↓←→` means use arrow keys after prefix
+- `^B { }` means two separate keys: { for swap up, } for swap down
+- Split creates new panes within windows
+
+---
+
 ## Notes on Consolidation
 
 The consolidated tables above experiment with different ways to organize commands:
