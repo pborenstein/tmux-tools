@@ -126,6 +126,233 @@ Additional window operations:
 
 ---
 
+## V2: Swapped Columns + Bookend Actions
+
+| action  | window         | session        | pane           | action  |
+| :------ | :------------- | :------------- | :------------- | :------ |
+| prev    | ^B p           | ^B (           | —              | prev    |
+| next    | ^B n           | ^B )           | —              | next    |
+| last    | ^B l           | ^B L           | ^B ;           | last    |
+| new     | ^B c           | new-session    | split-window   | new     |
+| choose  | ^B w           | ^B s           | —              | choose  |
+| select  | ^B 0-9         | —              | ^B ↑↓←→        | select  |
+| rename  | ^B ,           | ^B $           | —              | rename  |
+| kill    | ^B &           | kill-session   | ^B x           | kill    |
+| detach  | —              | ^B d           | —              | detach  |
+| attach  | —              | attach-session | —              | attach  |
+| find    | ^B f           | —              | —              | find    |
+| move    | ^B .           | —              | move-pane      | move    |
+| swap    | swap-window    | —              | ^B { }         | swap    |
+| zoom    | —              | —              | ^B z           | zoom    |
+| split ↕ | ^B "           | —              | —              | split ↕ |
+| split ↔ | ^B %           | —              | —              | split ↔ |
+| display | —              | —              | ^B q           | display |
+| mark    | —              | —              | ^B m           | mark    |
+| break   | —              | —              | ^B !           | break   |
+
+---
+
+## V3: Action in the Middle
+
+| window         | session        | action  | pane           |
+| :------------- | :------------- | :------ | :------------- |
+| ^B p           | ^B (           | prev    | —              |
+| ^B n           | ^B )           | next    | —              |
+| ^B l           | ^B L           | last    | ^B ;           |
+| ^B c           | new-session    | new     | split-window   |
+| ^B w           | ^B s           | choose  | —              |
+| ^B 0-9         | —              | select  | ^B ↑↓←→        |
+| ^B ,           | ^B $           | rename  | —              |
+| ^B &           | kill-session   | kill    | ^B x           |
+| —              | ^B d           | detach  | —              |
+| —              | attach-session | attach  | —              |
+| ^B f           | —              | find    | —              |
+| ^B .           | —              | move    | move-pane      |
+| swap-window    | —              | swap    | ^B { }         |
+| —              | —              | zoom    | ^B z           |
+| ^B "           | —              | split ↕ | —              |
+| ^B %           | —              | split ↔ | —              |
+| —              | —              | display | ^B q           |
+| —              | —              | mark    | ^B m           |
+| —              | —              | break   | ^B !           |
+
+---
+
+## V4: Grouped by Action Type (with spacing)
+
+| action  | window         | session        | pane           | action  |
+| :------ | :------------- | :------------- | :------------- | :------ |
+| **NAVIGATE** |            |                |                | |
+| prev    | ^B p           | ^B (           | —              | prev    |
+| next    | ^B n           | ^B )           | —              | next    |
+| last    | ^B l           | ^B L           | ^B ;           | last    |
+|         |                |                |                |         |
+| **CREATE** |             |                |                | |
+| new     | ^B c           | new-session    | split-window   | new     |
+| split ↕ | ^B "           | —              | —              | split ↕ |
+| split ↔ | ^B %           | —              | —              | split ↔ |
+|         |                |                |                |         |
+| **MANAGE** |             |                |                | |
+| choose  | ^B w           | ^B s           | —              | choose  |
+| select  | ^B 0-9         | —              | ^B ↑↓←→        | select  |
+| rename  | ^B ,           | ^B $           | —              | rename  |
+| find    | ^B f           | —              | —              | find    |
+| display | —              | —              | ^B q           | display |
+|         |                |                |                |         |
+| **ARRANGE** |            |                |                | |
+| move    | ^B .           | —              | move-pane      | move    |
+| swap    | swap-window    | —              | ^B { }         | swap    |
+| zoom    | —              | —              | ^B z           | zoom    |
+| break   | —              | —              | ^B !           | break   |
+| mark    | —              | —              | ^B m           | mark    |
+|         |                |                |                |         |
+| **DELETE** |             |                |                | |
+| kill    | ^B &           | kill-session   | ^B x           | kill    |
+|         |                |                |                |         |
+| **SESSION** |            |                |                | |
+| attach  | —              | attach-session | —              | attach  |
+| detach  | —              | ^B d           | —              | detach  |
+
+---
+
+## V5: Minimal (Most Common Only)
+
+| action | window | session     | pane    | action |
+| :----- | :----- | :---------- | :------ | :----- |
+|        |        |             |         |        |
+| prev   | ^B p   | ^B (        | —       | prev   |
+| next   | ^B n   | ^B )        | —       | next   |
+| last   | ^B l   | ^B L        | ^B ;    | last   |
+|        |        |             |         |        |
+| new    | ^B c   | new-session | ^B " %  | new    |
+| choose | ^B w   | ^B s        | —       | choose |
+| rename | ^B ,   | ^B $        | —       | rename |
+| kill   | ^B &   | kill-session| ^B x    | kill   |
+|        |        |             |         |        |
+| detach | —      | ^B d        | —       | detach |
+
+---
+
+## V6: Super Compact (One-Letter Actions)
+
+| ⚡ | win      | ses          | pane     | ⚡ |
+| :- | :------- | :----------- | :------- | :- |
+| ← | ^B p     | ^B (         | —        | ← |
+| → | ^B n     | ^B )         | —        | → |
+| ↩ | ^B l     | ^B L         | ^B ;     | ↩ |
+|   |          |              |          |   |
+| + | ^B c     | new-session  | ^B " %   | + |
+| ⋮ | ^B w     | ^B s         | ^B q     | ⋮ |
+| ✏ | ^B ,     | ^B $         | —        | ✏ |
+| ✕ | ^B &     | kill-session | ^B x     | ✕ |
+|   |          |              |          |   |
+| ⚲ | —        | ^B d         | —        | ⚲ |
+
+**Legend:** ← prev | → next | ↩ last | + new | ⋮ choose | ✏ rename | ✕ kill | ⚲ detach
+
+---
+
+## V7: Frequency-Based (Most Used First)
+
+| 🔥 | action | window | session      | pane    | action | 🔥 |
+| :- | :----- | :----- | :----------- | :------ | :----- | :- |
+| 🌟 | new    | ^B c   | new-session  | ^B " %  | new    | 🌟 |
+| 🌟 | next   | ^B n   | ^B )         | —       | next   | 🌟 |
+| 🌟 | prev   | ^B p   | ^B (         | —       | prev   | 🌟 |
+| 🌟 | choose | ^B w   | ^B s         | —       | choose | 🌟 |
+|    |        |        |              |         |        |    |
+| ⭐ | last   | ^B l   | ^B L         | ^B ;    | last   | ⭐ |
+| ⭐ | kill   | ^B &   | kill-session | ^B x    | kill   | ⭐ |
+| ⭐ | rename | ^B ,   | ^B $         | —       | rename | ⭐ |
+| ⭐ | detach | —      | ^B d         | —       | detach | ⭐ |
+|    |        |        |              |         |        |    |
+|    | select | ^B 0-9 | —            | ^B ↑↓←→ | select |    |
+|    | find   | ^B f   | —            | —       | find   |    |
+|    | zoom   | —      | —            | ^B z    | zoom   |    |
+|    | swap   | swap-w | —            | ^B { }  | swap   |    |
+
+---
+
+## V8: Vertical Scan (Scopes as Rows)
+
+| scope   | prev   | next   | last   | new     | choose | select  | rename | kill    |
+| :------ | :----- | :----- | :----- | :------ | :----- | :------ | :----- | :------ |
+| window  | ^B p   | ^B n   | ^B l   | ^B c    | ^B w   | ^B 0-9  | ^B ,   | ^B &    |
+| session | ^B (   | ^B )   | ^B L   | new-ses | ^B s   | —       | ^B $   | kill-se |
+| pane    | —      | —      | ^B ;   | ^B " %  | —      | ^B ↑↓←→ | —      | ^B x    |
+
+| scope   | detach | attach  | find   | move   | swap   | zoom   | display | mark   | break  |
+| :------ | :----- | :------ | :----- | :----- | :----- | :----- | :------ | :----- | :----- |
+| window  | —      | —       | ^B f   | ^B .   | swap-w | —      | —       | —      | —      |
+| session | ^B d   | attach  | —      | —      | —      | —      | —       | —      | —      |
+| pane    | —      | —       | —      | move-p | ^B { } | ^B z   | ^B q    | ^B m   | ^B !   |
+
+---
+
+## V9: Two-Column Split (Core vs Advanced)
+
+### Core Operations
+
+| action | window | session      | pane   | action |
+| :----- | :----- | :----------- | :----- | :----- |
+| prev   | ^B p   | ^B (         | —      | prev   |
+| next   | ^B n   | ^B )         | —      | next   |
+| last   | ^B l   | ^B L         | ^B ;   | last   |
+|        |        |              |        |        |
+| new    | ^B c   | new-session  | ^B " % | new    |
+| select | ^B 0-9 | —            | ^B ↑↓←→| select |
+| kill   | ^B &   | kill-session | ^B x   | kill   |
+
+### Advanced Operations
+
+| action  | window      | session        | pane      | action  |
+| :------ | :---------- | :------------- | :-------- | :------ |
+| choose  | ^B w        | ^B s           | —         | choose  |
+| rename  | ^B ,        | ^B $           | —         | rename  |
+| find    | ^B f        | —              | —         | find    |
+|         |             |                |           |         |
+| move    | ^B .        | —              | move-pane | move    |
+| swap    | swap-window | —              | ^B { }    | swap    |
+| zoom    | —           | —              | ^B z      | zoom    |
+| display | —           | —              | ^B q      | display |
+| mark    | —           | —              | ^B m      | mark    |
+| break   | —           | —              | ^B !      | break   |
+|         |             |                |           |         |
+| attach  | —           | attach-session | —         | attach  |
+| detach  | —           | ^B d           | —         | detach  |
+
+---
+
+## V10: Color-Coded by Scope (Text-Based)
+
+| action  | window         | session        | pane           | action  |
+| :------ | :------------- | :------------- | :------------- | :------ |
+|         | **[WINDOW]**   | **[SESSION]**  | **[PANE]**     |         |
+| prev    | ^B p           | ^B (           | —              | prev    |
+| next    | ^B n           | ^B )           | —              | next    |
+| last    | ^B l           | ^B L           | ^B ;           | last    |
+|         |                |                |                |         |
+| new     | ^B c           | new-session    | split-window   | new     |
+| choose  | ^B w           | ^B s           | —              | choose  |
+| select  | ^B 0-9         | —              | ^B ↑↓←→        | select  |
+|         |                |                |                |         |
+| rename  | ^B ,           | ^B $           | —              | rename  |
+| kill    | ^B &           | kill-session   | ^B x           | kill    |
+|         |                |                |                |         |
+| find    | ^B f           | —              | —              | find    |
+| move    | ^B .           | —              | move-pane      | move    |
+| swap    | swap-window    | —              | ^B { }         | swap    |
+|         |                |                |                |         |
+| zoom    | —              | —              | ^B z           | zoom    |
+| display | —              | —              | ^B q           | display |
+| mark    | —              | —              | ^B m           | mark    |
+| break   | —              | —              | ^B !           | break   |
+|         |                |                |                |         |
+| detach  | —              | ^B d           | —              | detach  |
+| attach  | —              | attach-session | —              | attach  |
+
+---
+
 ## Notes on Consolidation
 
 The consolidated tables above experiment with different ways to organize commands:
