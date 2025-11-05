@@ -35,7 +35,7 @@ Not all Unicode characters have dual presentation. To find out:
 
 ### 1. Check the Unicode Standard
 - **Emoji specification**: [Unicode TR51](https://www.unicode.org/reports/tr51/)
-- **Emoji data file**: https://unicode.org/Public/emoji/latest/emoji-data.txt
+- **Emoji data file**: https://www.unicode.org/Public/UCD/latest/ucd/emoji/emoji-data.txt
 - Look for characters with `Emoji_Presentation` property
 
 ### 2. Common Characters That Need VS15 in Technical Docs
@@ -66,8 +66,8 @@ To check if a character needs a variation selector:
 You can check the Unicode emoji data file:
 
 ```bash
-# Download the emoji data
-curl https://unicode.org/Public/emoji/latest/emoji-data.txt > emoji-data.txt
+# Download the emoji data (Unicode 16.0, latest as of 2024)
+curl https://www.unicode.org/Public/UCD/latest/ucd/emoji/emoji-data.txt > emoji-data.txt
 
 # Check if a character (e.g., U+2195) has Emoji_Presentation
 grep "2195" emoji-data.txt
