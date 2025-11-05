@@ -353,6 +353,154 @@ Additional window operations:
 
 ---
 
+## V11: Grouped with Commands (Inline)
+
+| action  | window         | session        | pane           | action  |
+| :------ | :------------- | :------------- | :------------- | :------ |
+| **NAVIGATE** |            |                |                | |
+| prev    | ^B p<br>previous-window | ^B (<br>switch-client -p | — | prev |
+| next    | ^B n<br>next-window | ^B )<br>switch-client -n | — | next |
+| last    | ^B l<br>last-window | ^B L<br>switch-client -l | ^B ;<br>last-pane | last |
+|         |                |                |                |         |
+| **CREATE** |             |                |                | |
+| new     | ^B c<br>new-window | new-session | split-window | new |
+| split ↕ | ^B "<br>split-window | — | — | split ↕ |
+| split ↔ | ^B %<br>split-window -h | — | — | split ↔ |
+|         |                |                |                |         |
+| **MANAGE** |             |                |                | |
+| choose  | ^B w<br>choose-tree -Zw | ^B s<br>choose-tree -Zs | — | choose |
+| select  | ^B 0-9<br>select-window -t :=N | — | ^B ↑↓←→<br>select-pane | select |
+| rename  | ^B ,<br>rename-window | ^B $<br>rename-session | — | rename |
+| find    | ^B f<br>find-window -Z | — | — | find |
+| display | — | — | ^B q<br>display-panes | display |
+|         |                |                |                |         |
+| **ARRANGE** |            |                |                | |
+| move    | ^B .<br>move-window | — | move-pane | move |
+| swap    | swap-window | — | ^B { }<br>swap-pane -U/-D | swap |
+| zoom    | — | — | ^B z<br>resize-pane -Z | zoom |
+| break   | — | — | ^B !<br>break-pane | break |
+| mark    | — | — | ^B m<br>select-pane -m | mark |
+|         |                |                |                |         |
+| **DELETE** |             |                |                | |
+| kill    | ^B &<br>kill-window | kill-session | ^B x<br>kill-pane | kill |
+|         |                |                |                |         |
+| **SESSION** |            |                |                | |
+| attach  | — | attach-session | — | attach |
+| detach  | — | ^B d<br>detach-client | — | detach |
+
+---
+
+## V12: Grouped with Commands (Parenthetical)
+
+| action  | window         | session        | pane           | action  |
+| :------ | :------------- | :------------- | :------------- | :------ |
+| **NAVIGATE** |            |                |                | |
+| prev    | ^B p (previous-window) | ^B ( (switch-client -p) | — | prev |
+| next    | ^B n (next-window) | ^B ) (switch-client -n) | — | next |
+| last    | ^B l (last-window) | ^B L (switch-client -l) | ^B ; (last-pane) | last |
+|         |                |                |                |         |
+| **CREATE** |             |                |                | |
+| new     | ^B c (new-window) | new-session | split-window | new |
+| split ↕ | ^B " (split-window) | — | — | split ↕ |
+| split ↔ | ^B % (split-window -h) | — | — | split ↔ |
+|         |                |                |                |         |
+| **MANAGE** |             |                |                | |
+| choose  | ^B w (choose-tree -Zw) | ^B s (choose-tree -Zs) | — | choose |
+| select  | ^B 0-9 (select-window) | — | ^B ↑↓←→ (select-pane) | select |
+| rename  | ^B , (rename-window) | ^B $ (rename-session) | — | rename |
+| find    | ^B f (find-window) | — | — | find |
+| display | — | — | ^B q (display-panes) | display |
+|         |                |                |                |         |
+| **ARRANGE** |            |                |                | |
+| move    | ^B . (move-window) | — | move-pane | move |
+| swap    | swap-window | — | ^B { } (swap-pane) | swap |
+| zoom    | — | — | ^B z (resize-pane -Z) | zoom |
+| break   | — | — | ^B ! (break-pane) | break |
+| mark    | — | — | ^B m (select-pane -m) | mark |
+|         |                |                |                |         |
+| **DELETE** |             |                |                | |
+| kill    | ^B & (kill-window) | kill-session | ^B x (kill-pane) | kill |
+|         |                |                |                |         |
+| **SESSION** |            |                |                | |
+| attach  | — | attach-session | — | attach |
+| detach  | — | ^B d (detach-client) | — | detach |
+
+---
+
+## V13: Grouped - Key/Command Split Columns
+
+| action  | win key | win cmd         | ses key | ses cmd         | pane key  | pane cmd       | action  |
+| :------ | :------ | :-------------- | :------ | :-------------- | :-------- | :------------- | :------ |
+| **NAVIGATE** |     |                 |         |                 |           |                | |
+| prev    | ^B p    | previous-window | ^B (    | switch-client -p| —         | —              | prev    |
+| next    | ^B n    | next-window     | ^B )    | switch-client -n| —         | —              | next    |
+| last    | ^B l    | last-window     | ^B L    | switch-client -l| ^B ;      | last-pane      | last    |
+|         |         |                 |         |                 |           |                |         |
+| **CREATE** |      |                 |         |                 |           |                | |
+| new     | ^B c    | new-window      | —       | new-session     | ^B " %    | split-window   | new     |
+| split ↕ | ^B "    | split-window    | —       | —               | —         | —              | split ↕ |
+| split ↔ | ^B %    | split-window -h | —       | —               | —         | —              | split ↔ |
+|         |         |                 |         |                 |           |                |         |
+| **MANAGE** |      |                 |         |                 |           |                | |
+| choose  | ^B w    | choose-tree -Zw | ^B s    | choose-tree -Zs | —         | —              | choose  |
+| select  | ^B 0-9  | select-window   | —       | —               | ^B ↑↓←→   | select-pane    | select  |
+| rename  | ^B ,    | rename-window   | ^B $    | rename-session  | —         | —              | rename  |
+| find    | ^B f    | find-window     | —       | —               | —         | —              | find    |
+| display | —       | —               | —       | —               | ^B q      | display-panes  | display |
+|         |         |                 |         |                 |           |                |         |
+| **ARRANGE** |     |                 |         |                 |           |                | |
+| move    | ^B .    | move-window     | —       | —               | —         | move-pane      | move    |
+| swap    | —       | swap-window     | —       | —               | ^B { }    | swap-pane      | swap    |
+| zoom    | —       | —               | —       | —               | ^B z      | resize-pane -Z | zoom    |
+| break   | —       | —               | —       | —               | ^B !      | break-pane     | break   |
+| mark    | —       | —               | —       | —               | ^B m      | select-pane -m | mark    |
+|         |         |                 |         |                 |           |                |         |
+| **DELETE** |      |                 |         |                 |           |                | |
+| kill    | ^B &    | kill-window     | —       | kill-session    | ^B x      | kill-pane      | kill    |
+|         |         |                 |         |                 |           |                |         |
+| **SESSION** |     |                 |         |                 |           |                | |
+| attach  | —       | —               | —       | attach-session  | —         | —              | attach  |
+| detach  | —       | —               | ^B d    | detach-client   | —         | —              | detach  |
+
+---
+
+## V14: Grouped - Compact Notation (key→cmd)
+
+| action  | window         | session        | pane           | action  |
+| :------ | :------------- | :------------- | :------------- | :------ |
+| **NAVIGATE** |            |                |                | |
+| prev    | ^B p → previous-window | ^B ( → switch-client -p | — | prev |
+| next    | ^B n → next-window | ^B ) → switch-client -n | — | next |
+| last    | ^B l → last-window | ^B L → switch-client -l | ^B ; → last-pane | last |
+|         |                |                |                |         |
+| **CREATE** |             |                |                | |
+| new     | ^B c → new-window | new-session | split-window | new |
+| split ↕ | ^B " → split-window | — | — | split ↕ |
+| split ↔ | ^B % → split-window -h | — | — | split ↔ |
+|         |                |                |                |         |
+| **MANAGE** |             |                |                | |
+| choose  | ^B w → choose-tree -Zw | ^B s → choose-tree -Zs | — | choose |
+| select  | ^B 0-9 → select-window | — | ^B ↑↓←→ → select-pane | select |
+| rename  | ^B , → rename-window | ^B $ → rename-session | — | rename |
+| find    | ^B f → find-window | — | — | find |
+| display | — | — | ^B q → display-panes | display |
+|         |                |                |                |         |
+| **ARRANGE** |            |                |                | |
+| move    | ^B . → move-window | — | move-pane | move |
+| swap    | swap-window | — | ^B { } → swap-pane | swap |
+| zoom    | — | — | ^B z → resize-pane -Z | zoom |
+| break   | — | — | ^B ! → break-pane | break |
+| mark    | — | — | ^B m → select-pane -m | mark |
+|         |                |                |                |         |
+| **DELETE** |             |                |                | |
+| kill    | ^B & → kill-window | kill-session | ^B x → kill-pane | kill |
+|         |                |                |                |         |
+| **SESSION** |            |                |                | |
+| attach  | — | attach-session | — | attach |
+| detach  | — | ^B d → detach-client | — | detach |
+
+---
+
 ## Notes on Consolidation
 
 The consolidated tables above experiment with different ways to organize commands:
