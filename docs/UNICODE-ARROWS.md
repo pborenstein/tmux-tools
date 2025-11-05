@@ -92,6 +92,203 @@ If you see `Emoji_Presentation`, the character may render as emoji by default.
 - Some editors have "show invisibles" mode that reveals them
 - To type VS15: Copy from this doc or use hex input (depends on OS/editor)
 
+## How to See U+FE0E (The Invisible Character)
+
+Variation selectors are invisible by design, which makes them tricky to work with.
+
+### Using Command-Line Tools
+
+```bash
+# View hex bytes
+echo "↕︎" | xxd
+# Output: e28695 efb88e (U+2195 followed by U+FE0E)
+
+# More readable format
+echo "↕︎" | od -An -tx1 -tc
+# Shows both hex and character representation
+
+# Count actual characters (will show 2: arrow + VS)
+echo "↕︎" | wc -m
+
+# Check files for variation selectors
+grep "↕" docs/TABLES.md | xxd | less
+```
+
+### In less/Pagers
+
+`less` doesn't have a built-in "show invisibles" mode:
+
+```bash
+# Pre-process to show hex codes
+cat file.md | od -An -tx1c | less
+
+# Use hexdump for detailed view
+xxd file.md | less
+
+# Search for the byte sequence (EF B8 8E in UTF-8)
+xxd file.md | grep "efb88e"
+```
+
+### In Text Editors
+
+**Vim:**
+```vim
+:set list                    " Show some invisible characters
+" Position cursor on character and press:
+ga                           " Shows Unicode code point (e.g., <U+FE0E>)
+```
+
+**VS Code:**
+- Install "Unicode code point of current character" extension
+- Or use "Insert Unicode" extension to see/insert characters
+
+**Emacs:**
+```elisp
+M-x describe-char           " Shows full Unicode info at point
+```
+
+## How to Type U+FE0E
+
+### Method 1: Copy-Paste (Easiest)
+
+Copy this variation selector: `︎` (between quotes: "︎")
+
+Or copy from existing text:
+```
+↕︎ ↔︎ ↑︎ ↓︎ ←︎ →︎
+```
+
+### Method 2: Shell/Scripts
+
+```bash
+# Using printf
+printf '\uFE0E'
+
+# Using echo (with -e flag)
+echo -e '\uFE0E'
+
+# Combine with arrow
+printf '↕\uFE0E'
+
+# Create a file with text-style arrows
+printf '↕\uFE0E ↔\uFE0E ↑\uFE0E ↓\uFE0E ←\uFE0E →\uFE0E\n' > arrows.txt
+```
+
+### Method 3: OS-Specific Input
+
+**macOS:**
+- Open Character Viewer (Ctrl+Cmd+Space)
+- Search for "variation selector"
+- Double-click to insert
+
+Or use Unicode hex input:
+1. Enable "Unicode Hex Input" in System Preferences > Keyboard > Input Sources
+2. Hold Option and type: `FE0E`
+3. Release Option
+
+**Linux (GTK apps):**
+```
+Ctrl+Shift+U, then type: fe0e, then Enter
+```
+
+**Windows:**
+- Use Character Map utility and search for "variation selector"
+- Or in some apps: type `FE0E` then Alt+X
+
+### Method 4: In Text Editors
+
+**Vim:**
+```vim
+" In insert mode:
+Ctrl+V u FE0E
+" or for full 6-digit code:
+Ctrl+V U 0000FE0E
+```
+
+**Emacs:**
+```
+C-x 8 RET FE0E RET
+```
+
+**VS Code / Most Modern Editors:**
+- Install Unicode input extension
+- Or copy-paste from this document
+
+## Testing Variation Selectors
+
+### Quick Visual Test
+
+```bash
+#!/bin/bash
+# test-variation-selectors.sh
+
+echo "Without VS15 (may show emoji):"
+echo "↕ ↔ ↑ ↓ ← →"
+echo
+
+echo "With VS15 (should show text glyph):"
+printf "↕\uFE0E ↔\uFE0E ↑\uFE0E ↓\uFE0E ←\uFE0E →\uFE0E\n"
+echo
+
+echo "Hex dump of arrow with VS15:"
+printf "↕\uFE0E" | xxd
+```
+
+### Verification in Files
+
+```bash
+# Find arrows that may need VS15
+grep -n "↕\|↔\|↑\|↓\|←\|→" docs/*.md
+
+# Check if VS15 is present (look for EF B8 8E bytes)
+grep "↕" docs/TABLES.md | xxd | grep "efb88e"
+
+# Count variation selectors in a file
+grep -o $'\uFE0E' file.md | wc -l
+```
+
+### Test Rendering in Browser
+
+Create a simple HTML file:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 24px; }
+        .emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji"; }
+    </style>
+</head>
+<body>
+    <h2>Without VS15 (default rendering):</h2>
+    <p>↕ ↔ ↑ ↓ ← →</p>
+
+    <h2>With VS15 (text style forced):</h2>
+    <p>↕︎ ↔︎ ↑︎ ↓︎ ←︎ →︎</p>
+
+    <h2>With emoji font (for comparison):</h2>
+    <p class="emoji">↕ ↔ ↑ ↓ ← →</p>
+</body>
+</html>
+```
+
+## Practical Tips
+
+1. **Copy from existing files**: The easiest workflow is to copy arrows with VS15 from files where they're already correct (like `docs/TABLES.md`)
+
+2. **Use search & replace carefully**: When doing bulk edits, be careful not to add VS15 twice:
+   ```bash
+   # BAD: This could add VS15 to arrows that already have it
+   sed 's/↕/↕\xEF\xB8\x8E/g' file.md
+
+   # BETTER: Check first, edit manually or with a smarter script
+   ```
+
+3. **Verify in target environment**: Test how arrows render in your actual use case (GitHub, browser, PDF, etc.)
+
+4. **Document for collaborators**: If others will edit these files, add a note in CONTRIBUTING.md about variation selectors
+
 ## Implementation in This Project
 
 All arrow characters in our reference tables use VS15 to ensure consistent text rendering:
