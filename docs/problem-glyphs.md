@@ -10,3 +10,9 @@ Problem glyphs
 
 ---
 
+<h2>Without VS15 (default rendering):</h2>
+<p>↕ ↔ ↑ ↓ ← →</p>
+
+  <h2>With VS15 (text style forced):</h2>
+<p>↕︎ ↔︎ ↑︎ ↓︎ ←︎ →︎</p>
+    
