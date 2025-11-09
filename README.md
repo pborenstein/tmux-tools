@@ -107,24 +107,25 @@ tt help panes                       # Show pane commands (using short alias)
 
 **Compact status:**
 ```
-session       win  name      p  cmd      w
--------       ---  --------  -  -------  ---
-oslo          0    elk       0  fish     142
-              0              1  fish
-              1    cat       0  node
-milan         0    mouse     0  fish     89
+TMUX STATUS Sun Nov  9 00:08:00 EST 2025
+
+  session       win  name                  p  cmd      w
+- -------       ---  --------------------  -  -------  ---
+• oslo          0    tmux-tools            0  bash     172
+                1    apantli               0  fish
+                2    apantli               0  bash
+                3    docs                  0  fish
+
+  rio           0    home                  0  bash     -
 ```
 
 **Tree overview:**
 ```
-* oslo (2025-09-24 23:30:47) [attached]
-    - 0:seal (3 panes) [active]
-    - 1:bear (1 panes)
-
-* milan (2025-09-24 23:44:03) [detached]
-    - 0:otter (1 panes)
-
-Total: 2 sessions, 3 windows
+● oslo        • tmux-tools
+                apantli
+                apantli
+                docs
+○ rio         • home
 ```
 
 ## Configuration
