@@ -199,14 +199,15 @@ cmd_config() {
 tmux-tools config - Manage configuration settings
 
 USAGE:
-    tmux-tools config <subcommand>
+    tmux-tools config [subcommand]
 
 SUBCOMMANDS:
-    show            Show current configuration settings
+    show            Show current configuration settings (default)
     create          Create an example configuration file
     edit            Edit the configuration file
 
 EXAMPLES:
+    tmux-tools config               # Show current settings (default)
     tmux-tools config show          # Show current settings
     tmux-tools config create        # Create ~/.tmux-tools.yaml
     tmux-tools config edit          # Edit configuration file
@@ -219,6 +220,10 @@ Configuration files are searched in this order:
   ./tmux-tools.yaml
   ./tmux-tools.yml
 EOF
+      ;;
+    "")
+      # Default to show when no subcommand provided
+      cmd_config show
       ;;
     *)
       echo "Error: Unknown config subcommand '$subcommand'" >&2
