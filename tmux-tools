@@ -262,11 +262,13 @@ cmd_help() {
     sessions|windows|panes|layouts|copy|misc)
       # Show specific section from COMMANDS.md
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
-        # Extract section - capitalize first letter for matching
-        local section_name="${topic^}"
-
-        # Special case handling for section names
+        # Map topic to section name (bash 3.x compatible)
+        local section_name
         case "$topic" in
+          sessions) section_name="Sessions" ;;
+          windows) section_name="Windows" ;;
+          panes) section_name="Panes" ;;
+          layouts) section_name="Layouts" ;;
           copy) section_name="Copy Mode" ;;
           misc) section_name="Miscellaneous" ;;
         esac
