@@ -61,7 +61,7 @@ COMMANDS:
     overview        Show comprehensive session overview
     rename          Rename sessions and windows
     config          Manage configuration settings
-    help            Show tmux command reference and help
+    help, h         Show tmux command reference and help
     version         Show version information
 
 EXAMPLES:
@@ -72,12 +72,13 @@ EXAMPLES:
     tmux-tools rename sessions          # Rename all sessions to city names
     tmux-tools rename auto              # Smart auto-rename (cities for sessions, dirs for windows)
     tmux-tools config show              # Show current configuration
-    tmux-tools help                     # Show tmux command reference
-    tmux-tools help sessions            # Show session-specific commands
-    tmux-tools help windows             # Show window-specific commands
+    tt h                                # Show tmux command reference (short form)
+    tt h ses                            # Show session commands (short form)
+    tt h win                            # Show window commands (short form)
+    tt h pan                            # Show pane commands (short form)
 
 Use 'tmux-tools <command> --help' for more information on a specific command.
-Use 'tmux-tools help <topic>' for tmux command reference (sessions, windows, panes, etc.)
+Use 'tt h <topic>' for tmux command reference (ses, win, pan, layouts, copy, misc)
 EOF
 }
 
@@ -259,15 +260,15 @@ cmd_help() {
         exit 1
       fi
       ;;
-    sessions|windows|panes|layouts|copy|misc)
+    sessions|ses|windows|win|panes|pan|layouts|copy|misc)
       # Show specific section from COMMANDS.md
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
         # Map topic to section name (bash 3.x compatible)
         local section_name
         case "$topic" in
-          sessions) section_name="Sessions" ;;
-          windows) section_name="Windows" ;;
-          panes) section_name="Panes" ;;
+          sessions|ses) section_name="Sessions" ;;
+          windows|win) section_name="Windows" ;;
+          panes|pan) section_name="Panes" ;;
           layouts) section_name="Layouts" ;;
           copy) section_name="Copy Mode" ;;
           misc) section_name="Miscellaneous" ;;
@@ -297,7 +298,7 @@ cmd_help() {
       ;;
     *)
       echo "Error: Unknown help topic '$topic'" >&2
-      echo "Available topics: commands, sessions, windows, panes, layouts, copy, misc" >&2
+      echo "Available topics: commands, sessions (ses), windows (win), panes (pan), layouts, copy, misc" >&2
       echo "Or use: status, overview, rename, config for command-specific help" >&2
       exit 1
       ;;
@@ -328,7 +329,7 @@ main() {
     config)
       cmd_config "$@"
       ;;
-    help)
+    help|h)
       cmd_help "$@"
       ;;
     --help|-h)
