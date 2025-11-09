@@ -247,6 +247,12 @@ cmd_help() {
   theme=$(get_config_value "theme")
   init_colors "$theme"
 
+  # Check if we should use colors before piping
+  local color_arg=""
+  if colors_supported; then
+    color_arg="force"
+  fi
+
   case "$topic" in
     status)
       exec "$SCRIPT_DIR/tmux-status.sh" --help
@@ -263,7 +269,7 @@ cmd_help() {
     commands)
       # Show full COMMANDS.md reference
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
-        cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown | less -R
+        cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown "$color_arg" | less -R
       else
         echo "Error: COMMANDS.md not found" >&2
         exit 1
@@ -290,7 +296,7 @@ cmd_help() {
             if ($0 ~ "## " section) found=1
           }
           found { print }
-        ' "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown | less -R
+        ' "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown "$color_arg" | less -R
       else
         echo "Error: COMMANDS.md not found" >&2
         exit 1
@@ -299,7 +305,7 @@ cmd_help() {
     "")
       # Show COMMANDS.md by default when no topic specified
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
-        cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown | less -R
+        cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown "$color_arg" | less -R
       else
         echo "Error: COMMANDS.md not found" >&2
         show_main_help
