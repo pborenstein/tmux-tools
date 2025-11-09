@@ -15,7 +15,7 @@
 #   3. Shows process ID (PID) and full paths only with --show-pid flag
 #   4. Displays client width to help identify device connections
 #   5. Optionally renames tmux sessions using predefined city names
-#   6. Optionally renames tmux windows using predefined mammal names
+#   6. Optionally renames tmux windows based on their active pane's directory
 #   7. Groups output by session with visual separation between sessions
 #   8. Shows window names only for first pane of each window
 #
@@ -187,25 +187,18 @@ if ! check_tmux_running; then
   exit 0
 fi
 
-# Get available name pools from configuration
+# Get available session names from configuration
 # Use mapfile if available, otherwise use while loop for compatibility
 if command -v mapfile >/dev/null 2>&1; then
   mapfile -t session_names < <(get_session_names)
-  mapfile -t window_names < <(get_window_names)
 elif command -v readarray >/dev/null 2>&1; then
   readarray -t session_names < <(get_session_names)
-  readarray -t window_names < <(get_window_names)
 else
   # Fallback for older bash versions
   session_names=()
   while IFS= read -r line; do
     session_names+=("$line")
   done < <(get_session_names)
-
-  window_names=()
-  while IFS= read -r line; do
-    window_names+=("$line")
-  done < <(get_window_names)
 fi
 
 # Handle renaming based on flags

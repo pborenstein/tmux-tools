@@ -336,8 +336,8 @@ This guide covers common issues, error messages, and solutions for tmux-tools.
 ### Custom Name Pools Not Working
 
 **Symptoms**:
-- Custom session/window names not used
-- Default city/mammal names still appearing
+- Custom session names not used
+- Default city names still appearing
 - Configuration appears correct
 
 **Solutions**:
@@ -346,7 +346,6 @@ This guide covers common issues, error messages, and solutions for tmux-tools.
    ```yaml
    naming:
      session_pool: "custom"  # Must be "custom" not "cities"
-     window_pool: "custom"   # Must be "custom" not "mammals"
 
      custom_sessions:
        - "dev"

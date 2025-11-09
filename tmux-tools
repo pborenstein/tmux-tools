@@ -167,7 +167,6 @@ cmd_config() {
       echo "Current settings:"
       echo "  Theme: $(get_config_value "theme")"
       echo "  Session pool: $(get_config_value "session_pool")"
-      echo "  Window pool: $(get_config_value "window_pool")"
       echo "  Attachment indicator: $(get_config_value "attachment_indicator")"
       echo "  Default format: $(get_config_value "default_format")"
       echo "  Show timestamps: $(get_config_value "show_timestamps")"
@@ -175,9 +174,6 @@ cmd_config() {
       echo
       echo "Available session names:"
       get_session_names | sed 's/^/  /'
-      echo
-      echo "Available window names:"
-      get_window_names | sed 's/^/  /'
       ;;
     create)
       local config_file="$HOME/.tmux-tools.yaml"

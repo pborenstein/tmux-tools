@@ -13,7 +13,7 @@
 **Smart window naming**:
 - Directory-based window naming using active pane's current directory
 - Automatic truncation to 20 characters
-- More contextual than random mammal names
+- More contextual and meaningful than generic names
 
 **Compatibility**:
 - bash 3.2+ support for macOS compatibility
