@@ -117,7 +117,7 @@ cmd_rename() {
 tmux-tools rename - Rename sessions and windows
 
 USAGE:
-    tmux-tools rename <subcommand> [options]
+    tmux-tools rename [subcommand] [options]
 
 SUBCOMMANDS:
     sessions        Rename ALL sessions to city names
@@ -125,6 +125,7 @@ SUBCOMMANDS:
     auto, --auto    Smart rename: cities for sessions, directories for windows
 
 EXAMPLES:
+    tmux-tools rename               # Show this help
     tmux-tools rename sessions      # Rename all sessions to cities
     tmux-tools rename windows       # Rename all windows to directory names
     tmux-tools rename auto          # Smart rename (cities + directories)
@@ -133,6 +134,10 @@ The rename command uses directory names from the active pane's current
 working directory for windows, and city names configured in your
 tmux-tools configuration file (~/.tmux-tools.yaml) for sessions.
 EOF
+      ;;
+    "")
+      # Show help when no subcommand provided
+      cmd_rename --help
       ;;
     *)
       echo "Error: Unknown rename subcommand '$subcommand'" >&2
