@@ -1,5 +1,23 @@
 # Roadmap
 
+## Recently Completed
+
+**Usability improvements**:
+- Short command aliases (`s`, `stat`, `o`, `ov`, `r`, `ren`, `c`, `conf`, `h`, `v`, `ver`)
+- Help topic shortcuts (`ses`, `win`, `pan`)
+- `tt` short alias for `tmux-tools`
+- Integrated help system with COMMANDS.md
+- Default command changed to `status`
+- Commands show help instead of errors when missing subcommands
+
+**Smart window naming**:
+- Directory-based window naming using active pane's current directory
+- Automatic truncation to 20 characters
+- More contextual than random mammal names
+
+**Compatibility**:
+- bash 3.2+ support for macOS compatibility
+
 ## Potential Improvements
 
 ### Near-term (Low effort)
@@ -38,9 +56,8 @@
 - Session/window switching
 
 **Advanced naming**:
-- Git repository integration
-- Working directory detection
-- Project-based naming
+- Git repository integration (branch name, repo status)
+- Project-based naming from config files
 
 ## Contributing
 

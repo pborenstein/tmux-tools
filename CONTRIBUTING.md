@@ -6,7 +6,7 @@ Thank you for considering contributing to tmux-tools. This document provides gui
 
 ### Prerequisites
 
-- bash 4.0 or later
+- bash 3.2 or later (macOS compatible)
 - tmux (any recent version)
 - Git for version control
 
@@ -24,13 +24,14 @@ Optional:
 
 2. Make scripts executable:
    ```bash
-   chmod +x tmux-tools tmux-status.sh tmux-overview
+   chmod +x tmux-tools tmux-status.sh tmux-overview tt
    ```
 
 3. Test basic functionality:
    ```bash
-   ./tmux-tools status
-   ./tmux-tools overview
+   ./tmux-tools status     # Or use short alias: ./tt s
+   ./tmux-tools overview   # Or use short alias: ./tt o
+   ./tt h                  # Show help and command reference
    ```
 
 ## Project Structure
@@ -38,13 +39,14 @@ Optional:
 ```
 tmux-tools/
 ├── lib/
-│   ├── tmux_core.sh      # Core tmux operations (195 lines)
-│   ├── tmux_display.sh   # Display formatting (225 lines)
+│   ├── tmux_core.sh      # Core tmux operations (255 lines)
+│   ├── tmux_display.sh   # Display formatting (313 lines)
 │   ├── tmux_colors.sh    # Color management (205 lines)
 │   └── tmux_config.sh    # Configuration handling (284 lines)
-├── tmux-tools            # Unified command interface (285 lines)
-├── tmux-status.sh        # Status display script (383 lines)
-└── tmux-overview         # Overview script (321 lines)
+├── tmux-tools            # Unified command interface (355 lines)
+├── tt                    # Short alias (symlink to tmux-tools)
+├── tmux-status.sh        # Status display script (364 lines)
+└── tmux-overview         # Overview script (336 lines)
 ```
 
 ## Development Guidelines
@@ -229,7 +231,7 @@ Before submitting, verify:
 
 - [ ] Code follows project style guidelines
 - [ ] All scripts are executable (`chmod +x`)
-- [ ] Changes work with bash 4.0+
+- [ ] Changes work with bash 3.2+ (macOS compatible)
 - [ ] Backward compatibility maintained
 - [ ] Error handling implemented
 - [ ] Documentation updated (if needed)

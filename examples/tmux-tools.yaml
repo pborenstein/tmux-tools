@@ -43,10 +43,10 @@ naming:
   # - custom: Use custom_sessions list below
   session_pool: "cities"
 
-  # Window naming pool
-  # Options: mammals, custom
-  # - mammals: Cat, Dog, Fox, Bat, Elk, Bear, Lion, Wolf, Seal, Deer, Otter, Mouse
-  # - custom: Use custom_windows list below
+  # Window naming pool (DEPRECATED - windows now use directory names)
+  # Windows are automatically named based on the active pane's current directory
+  # This setting is kept for backward compatibility but has no effect
+  # Options: mammals, custom (deprecated)
   window_pool: "mammals"
 
   # Custom session names (used when session_pool: "custom")
@@ -60,9 +60,9 @@ naming:
     - "admin"
     - "monitor"
 
-  # Custom window names (used when window_pool: "custom")
-  # Provide your own list of window names
-  # Names should be short (8 characters or less recommended)
+  # Custom window names (DEPRECATED - windows now use directory names)
+  # Windows are automatically named from the active pane's directory
+  # This setting is kept for backward compatibility but has no effect
   custom_windows:
     - "editor"
     - "terminal"
