@@ -57,25 +57,27 @@ USAGE:
     tt <command> [options]              # Short alias
 
 COMMANDS:
-    status          Show tmux session status in tabular format (default)
-    overview        Show comprehensive session overview
-    rename          Rename sessions and windows
-    config          Manage configuration settings
-    help, h         Show tmux command reference and help
-    version         Show version information
+    status, s, stat     Show tmux session status in tabular format (default)
+    overview, o, ov     Show comprehensive session overview
+    rename, r, ren      Rename sessions and windows
+    config, c, conf     Manage configuration settings
+    help, h             Show tmux command reference and help
+    version, v, ver     Show version information
 
 EXAMPLES:
     tmux-tools status                    # Show compact status
-    tt status --show-pid                 # Show detailed status with PIDs (using tt alias)
-    tmux-tools overview --detailed       # Show detailed overview
-    tmux-tools overview --json           # Output in JSON format
-    tmux-tools rename sessions          # Rename all sessions to city names
-    tmux-tools rename auto              # Smart auto-rename (cities for sessions, dirs for windows)
-    tmux-tools config show              # Show current configuration
-    tt h                                # Show tmux command reference (short form)
-    tt h ses                            # Show session commands (short form)
-    tt h win                            # Show window commands (short form)
-    tt h pan                            # Show pane commands (short form)
+    tt s --show-pid                      # Show detailed status (short form)
+    tt stat                              # Show status (alternate short form)
+    tt o --detailed                      # Show detailed overview (short form)
+    tt ov --json                         # Output overview in JSON (short form)
+    tt r sessions                        # Rename all sessions (short form)
+    tt ren auto                          # Smart auto-rename (short form)
+    tt c                                 # Show current configuration (short form)
+    tt conf create                       # Create config file (short form)
+    tt h                                 # Show tmux command reference
+    tt h ses                             # Show session commands
+    tt h win                             # Show window commands
+    tt v                                 # Show version (short form)
 
 Use 'tmux-tools <command> --help' for more information on a specific command.
 Use 'tt h <topic>' for tmux command reference (ses, win, pan, layouts, copy, misc)
@@ -322,16 +324,16 @@ main() {
   shift
 
   case "$command" in
-    status)
+    status|s|stat)
       cmd_status "$@"
       ;;
-    overview)
+    overview|o|ov)
       cmd_overview "$@"
       ;;
-    rename)
+    rename|r|ren)
       cmd_rename "$@"
       ;;
-    config)
+    config|c|conf)
       cmd_config "$@"
       ;;
     help|h)
@@ -340,7 +342,7 @@ main() {
     --help|-h)
       show_main_help
       ;;
-    version|--version|-v)
+    version|v|ver|--version|-v)
       show_version
       ;;
     *)
