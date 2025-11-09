@@ -5,16 +5,28 @@ Compact tabular view of tmux sessions, windows, and panes with smart renaming.
 ## Installation
 
 ```bash
-# Clone and add to PATH
+# Clone the repository
 git clone <repository-url> ~/.tmux-tools
-export PATH="$HOME/.tmux-tools:$PATH"
 
-# Or symlink to a directory already in PATH
-ln -s ~/.tmux-tools/tmux-tools /usr/local/bin/tmux-tools
-ln -s ~/.tmux-tools/tt /usr/local/bin/tt  # Optional: short alias
+# Recommended: symlink to ~/.local/bin (no sudo required)
+mkdir -p ~/.local/bin
+ln -s ~/.tmux-tools/tmux-tools ~/.local/bin/tmux-tools
+ln -s ~/.tmux-tools/tt ~/.local/bin/tt
+
+# Ensure ~/.local/bin is in your PATH (add to .bashrc or .zshrc)
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Add the export to your `.bashrc` or `.zshrc` for persistence.
+**Alternative:** Add the repo directory directly to PATH:
+```bash
+export PATH="$HOME/.tmux-tools:$PATH"
+```
+
+**Alternative:** Symlink to `/usr/local/bin` (requires sudo):
+```bash
+sudo ln -s ~/.tmux-tools/tmux-tools /usr/local/bin/tmux-tools
+sudo ln -s ~/.tmux-tools/tt /usr/local/bin/tt
+```
 
 The `tt` command is a short alias for `tmux-tools` - use whichever you prefer!
 
