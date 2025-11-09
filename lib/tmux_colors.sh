@@ -204,3 +204,57 @@ auto_init_colors() {
     init_colors "$theme"
   fi
 }
+
+# Colorize markdown content for help display
+# Colors H1 headings, H2 headings, and table headers
+# Reads from stdin, outputs to stdout
+colorize_markdown() {
+  local in_table=0
+  local line
+  local prev_line=""
+
+  while IFS= read -r line; do
+    # H1 heading (# Title)
+    if [[ "$line" =~ ^#[[:space:]] ]]; then
+      if colors_supported; then
+        echo -e "${HIGHLIGHT_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+    # H2 heading (## Section)
+    elif [[ "$line" =~ ^##[[:space:]] ]]; then
+      in_table=1  # Next table row will be a header
+      if colors_supported; then
+        echo -e "${INFO_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+    # Table header row (first row with | after H2)
+    elif [[ $in_table -eq 1 ]] && [[ "$line" =~ ^\|.*\| ]]; then
+      if colors_supported; then
+        # Color the entire header row
+        echo -e "${ACTIVE_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+      in_table=2  # Mark that we've seen the header
+    # Table separator row (|:---|:---|)
+    elif [[ $in_table -eq 2 ]] && [[ "$line" =~ ^\|[[:space:]]*:?-+:? ]]; then
+      if colors_supported; then
+        echo -e "${ACTIVE_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+      in_table=0  # Reset after separator
+    # Regular lines
+    else
+      # Reset table tracking on blank lines (unless we just saw H2)
+      if [[ -z "$line" ]] && [[ $in_table -ne 1 ]]; then
+        in_table=0
+      fi
+      echo "$line"
+    fi
+
+    prev_line="$line"
+  done
+}

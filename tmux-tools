@@ -241,6 +241,12 @@ EOF
 cmd_help() {
   local topic="$1"
 
+  # Initialize colors for markdown formatting
+  load_config
+  local theme
+  theme=$(get_config_value "theme")
+  init_colors "$theme"
+
   case "$topic" in
     status)
       exec "$SCRIPT_DIR/tmux-status.sh" --help
@@ -257,7 +263,7 @@ cmd_help() {
     commands)
       # Show full COMMANDS.md reference
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
-        less "$SCRIPT_DIR/docs/COMMANDS.md"
+        cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown | less -R
       else
         echo "Error: COMMANDS.md not found" >&2
         exit 1
@@ -277,14 +283,14 @@ cmd_help() {
           misc) section_name="Miscellaneous" ;;
         esac
 
-        # Extract the section using awk
+        # Extract the section using awk, colorize, and display
         awk -v section="$section_name" '
           /^## / {
             if (found) exit
             if ($0 ~ "## " section) found=1
           }
           found { print }
-        ' "$SCRIPT_DIR/docs/COMMANDS.md" | less
+        ' "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown | less -R
       else
         echo "Error: COMMANDS.md not found" >&2
         exit 1
@@ -293,7 +299,7 @@ cmd_help() {
     "")
       # Show COMMANDS.md by default when no topic specified
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
-        less "$SCRIPT_DIR/docs/COMMANDS.md"
+        cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown | less -R
       else
         echo "Error: COMMANDS.md not found" >&2
         show_main_help
