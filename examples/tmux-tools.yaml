@@ -13,6 +13,7 @@
 #   TMUX_TOOLS_THEME              - Color theme
 #   TMUX_TOOLS_SESSION_POOL       - Session naming pool
 #   TMUX_TOOLS_ATTACHMENT_INDICATOR - Attachment symbol
+#   TMUX_TOOLS_PAGER              - Help pager command
 #   NO_COLOR                      - Disable all colors when set
 
 # Display settings
@@ -33,6 +34,16 @@ display:
   # Enable/disable color output globally
   # Set to false to disable colors regardless of theme
   colors_enabled: true
+
+  # Pager for help command
+  # Options: auto, glow, bat, less, cat, or custom command
+  # - auto: Automatically uses glow if available, falls back to bat then less
+  # - glow: Beautiful markdown rendering (requires: brew install glow)
+  # - bat: Syntax-highlighted pager (requires: brew install bat)
+  # - less: Standard pager with ANSI color support
+  # - cat: Direct output without paging
+  # - Custom: Any pager command (e.g., "most", "more")
+  pager: "auto"
 
 # Naming settings
 naming:

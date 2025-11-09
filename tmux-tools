@@ -45,7 +45,7 @@ source "$SCRIPT_DIR/lib/tmux_colors.sh"
 source "$SCRIPT_DIR/lib/tmux_config.sh"
 
 # Version information
-VERSION="1.1.1"
+VERSION="1.2.0"
 
 # Show main help
 show_main_help() {

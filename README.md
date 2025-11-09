@@ -130,11 +130,12 @@ TMUX STATUS Sun Nov  9 00:08:00 EST 2025
 
 ## Configuration
 
-Optional: Create `~/.tmux-tools.yaml` to customize themes and naming:
+Optional: Create `~/.tmux-tools.yaml` to customize themes, pager, and naming:
 
 ```yaml
 display:
   theme: "default"              # default, vibrant, subtle, monochrome, none
+  pager: "auto"                 # auto, glow, bat, less, cat
 
 naming:
   session_pool: "cities"        # cities, custom
@@ -146,11 +147,21 @@ naming:
 
 Generate example config: `tmux-tools config create`
 
+**Pager Options:**
+
+The `pager` setting controls how help documentation is displayed:
+- **`auto`** (default) - Automatically uses `glow` if available, falls back to `bat`, then `less`
+- **`glow`** - Beautiful markdown rendering with syntax highlighting (install: `brew install glow`)
+- **`bat`** - Syntax-highlighted pager (install: `brew install bat`)
+- **`less`** - Standard pager with ANSI color support
+- **`cat`** - Direct output without paging
+
 **Environment variables:**
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `TMUX_TOOLS_THEME` | "default" | Color theme |
+| `TMUX_TOOLS_PAGER` | "auto" | Help pager command |
 | `NO_COLOR` | - | Disable colors |
 
 ## Naming
