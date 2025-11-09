@@ -31,6 +31,7 @@ TMUX_TOOLS_ATTACHMENT_INDICATOR="${TMUX_TOOLS_ATTACHMENT_INDICATOR:-•}"
 TMUX_TOOLS_DEFAULT_FORMAT="${TMUX_TOOLS_DEFAULT_FORMAT:-compact}"
 TMUX_TOOLS_SHOW_TIMESTAMPS="${TMUX_TOOLS_SHOW_TIMESTAMPS:-true}"
 TMUX_TOOLS_GROUP_SESSIONS="${TMUX_TOOLS_GROUP_SESSIONS:-true}"
+TMUX_TOOLS_PAGER="${TMUX_TOOLS_PAGER:-auto}"
 
 # Name pools
 declare -a CITY_NAMES=(
@@ -156,6 +157,7 @@ load_config() {
   TMUX_TOOLS_DEFAULT_FORMAT=$(parse_yaml_value "$config_file" "default_format" "$TMUX_TOOLS_DEFAULT_FORMAT")
   TMUX_TOOLS_SHOW_TIMESTAMPS=$(parse_yaml_value "$config_file" "show_timestamps" "$TMUX_TOOLS_SHOW_TIMESTAMPS")
   TMUX_TOOLS_GROUP_SESSIONS=$(parse_yaml_value "$config_file" "group_sessions" "$TMUX_TOOLS_GROUP_SESSIONS")
+  TMUX_TOOLS_PAGER=$(parse_yaml_value "$config_file" "pager" "$TMUX_TOOLS_PAGER")
 
   # Load naming settings
   TMUX_TOOLS_SESSION_POOL=$(parse_yaml_value "$config_file" "session_pool" "$TMUX_TOOLS_SESSION_POOL")
@@ -200,6 +202,7 @@ display:
   theme: "default"              # default, vibrant, subtle, monochrome, none
   attachment_indicator: "•"     # Character to show attached sessions
   colors_enabled: true          # Enable/disable color output
+  pager: "auto"                 # auto (glow if available, else less), glow, less, bat, cat
 
 # Naming settings
 naming:
@@ -233,6 +236,7 @@ get_config_value() {
     "default_format") echo "$TMUX_TOOLS_DEFAULT_FORMAT" ;;
     "show_timestamps") echo "$TMUX_TOOLS_SHOW_TIMESTAMPS" ;;
     "group_sessions") echo "$TMUX_TOOLS_GROUP_SESSIONS" ;;
+    "pager") echo "$TMUX_TOOLS_PAGER" ;;
     *) echo "$default_value" ;;
   esac
 }

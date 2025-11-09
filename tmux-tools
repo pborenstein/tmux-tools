@@ -45,7 +45,7 @@ source "$SCRIPT_DIR/lib/tmux_colors.sh"
 source "$SCRIPT_DIR/lib/tmux_config.sh"
 
 # Version information
-VERSION="1.1.1"
+VERSION="1.2.0"
 
 # Show main help
 show_main_help() {
@@ -166,6 +166,7 @@ cmd_config() {
       echo
       echo "Current settings:"
       echo "  Theme: $(get_config_value "theme")"
+      echo "  Pager: $(get_config_value "pager")"
       echo "  Session pool: $(get_config_value "session_pool")"
       echo "  Attachment indicator: $(get_config_value "attachment_indicator")"
       echo "  Default format: $(get_config_value "default_format")"
@@ -237,9 +238,85 @@ EOF
   esac
 }
 
+# Determine the best pager to use
+# Returns the pager command to use
+get_pager() {
+  local configured_pager
+  configured_pager=$(get_config_value "pager" "auto")
+
+  case "$configured_pager" in
+    auto)
+      # Auto-detect best available pager
+      if command -v glow &> /dev/null; then
+        echo "glow -p"
+      elif command -v bat &> /dev/null; then
+        echo "bat --style=plain --paging=always"
+      else
+        echo "less -R"
+      fi
+      ;;
+    glow)
+      if command -v glow &> /dev/null; then
+        echo "glow -p"
+      else
+        echo "less -R"
+      fi
+      ;;
+    bat)
+      if command -v bat &> /dev/null; then
+        echo "bat --style=plain --paging=always"
+      else
+        echo "less -R"
+      fi
+      ;;
+    less)
+      echo "less -R"
+      ;;
+    cat)
+      echo "cat"
+      ;;
+    *)
+      # Try using the configured pager if it exists
+      if command -v "$configured_pager" &> /dev/null; then
+        echo "$configured_pager"
+      else
+        echo "less -R"
+      fi
+      ;;
+  esac
+}
+
+# Check if pager needs colorization
+# Returns 0 (true) if we should use colorize_markdown
+pager_needs_colorization() {
+  local pager="$1"
+  # Only use colorize_markdown for less or cat
+  if [[ "$pager" == less* ]] || [[ "$pager" == "cat" ]]; then
+    return 0  # true
+  else
+    return 1  # false (glow, bat, etc. handle their own formatting)
+  fi
+}
+
 # Help command
 cmd_help() {
   local topic="$1"
+
+  # Initialize colors for markdown formatting
+  load_config
+  local theme
+  theme=$(get_config_value "theme")
+  init_colors "$theme"
+
+  # Determine which pager to use
+  local pager_cmd
+  pager_cmd=$(get_pager)
+
+  # Check if we should use colors before piping
+  local color_arg=""
+  if colors_supported; then
+    color_arg="force"
+  fi
 
   case "$topic" in
     status)
@@ -257,7 +334,11 @@ cmd_help() {
     commands)
       # Show full COMMANDS.md reference
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
-        less "$SCRIPT_DIR/docs/COMMANDS.md"
+        if pager_needs_colorization "$pager_cmd"; then
+          cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown "$color_arg" | $pager_cmd
+        else
+          cat "$SCRIPT_DIR/docs/COMMANDS.md" | $pager_cmd
+        fi
       else
         echo "Error: COMMANDS.md not found" >&2
         exit 1
@@ -277,14 +358,24 @@ cmd_help() {
           misc) section_name="Miscellaneous" ;;
         esac
 
-        # Extract the section using awk
-        awk -v section="$section_name" '
-          /^## / {
-            if (found) exit
-            if ($0 ~ "## " section) found=1
-          }
-          found { print }
-        ' "$SCRIPT_DIR/docs/COMMANDS.md" | less
+        # Extract the section using awk and display
+        if pager_needs_colorization "$pager_cmd"; then
+          awk -v section="$section_name" '
+            /^## / {
+              if (found) exit
+              if ($0 ~ "## " section) found=1
+            }
+            found { print }
+          ' "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown "$color_arg" | $pager_cmd
+        else
+          awk -v section="$section_name" '
+            /^## / {
+              if (found) exit
+              if ($0 ~ "## " section) found=1
+            }
+            found { print }
+          ' "$SCRIPT_DIR/docs/COMMANDS.md" | $pager_cmd
+        fi
       else
         echo "Error: COMMANDS.md not found" >&2
         exit 1
@@ -293,7 +384,11 @@ cmd_help() {
     "")
       # Show COMMANDS.md by default when no topic specified
       if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
-        less "$SCRIPT_DIR/docs/COMMANDS.md"
+        if pager_needs_colorization "$pager_cmd"; then
+          cat "$SCRIPT_DIR/docs/COMMANDS.md" | colorize_markdown "$color_arg" | $pager_cmd
+        else
+          cat "$SCRIPT_DIR/docs/COMMANDS.md" | $pager_cmd
+        fi
       else
         echo "Error: COMMANDS.md not found" >&2
         show_main_help

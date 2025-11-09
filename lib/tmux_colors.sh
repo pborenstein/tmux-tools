@@ -204,3 +204,71 @@ auto_init_colors() {
     init_colors "$theme"
   fi
 }
+
+# Colorize markdown content for help display
+# Colors H1 headings, H2 headings, and table headers
+# Reads from stdin, outputs to stdout
+# Args: [force] - if "force", always use colors regardless of TTY detection
+colorize_markdown() {
+  local force_colors=0
+  if [[ "$1" == "force" ]]; then
+    force_colors=1
+  fi
+
+  local in_table=0
+  local line
+  local prev_line=""
+
+  # Determine if we should use colors
+  local use_colors=0
+  if [[ $force_colors -eq 1 ]]; then
+    use_colors=1
+  elif colors_supported; then
+    use_colors=1
+  fi
+
+  while IFS= read -r line; do
+    # H1 heading (# Title)
+    if [[ "$line" =~ ^#[[:space:]] ]]; then
+      if [[ $use_colors -eq 1 ]]; then
+        echo -e "${HIGHLIGHT_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+    # H2 heading (## Section)
+    elif [[ "$line" =~ ^##[[:space:]] ]]; then
+      in_table=1  # Next table row will be a header
+      if [[ $use_colors -eq 1 ]]; then
+        echo -e "${INFO_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+    # Table header row (first row with | after H2)
+    elif [[ $in_table -eq 1 ]] && [[ "$line" =~ ^\|.*\| ]]; then
+      if [[ $use_colors -eq 1 ]]; then
+        # Color the entire header row
+        echo -e "${ACTIVE_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+      in_table=2  # Mark that we've seen the header
+    # Table separator row (|:---|:---|)
+    elif [[ $in_table -eq 2 ]] && [[ "$line" =~ ^\|[[:space:]]*:?-+:? ]]; then
+      if [[ $use_colors -eq 1 ]]; then
+        echo -e "${ACTIVE_COLOR}${line}${RESET_COLOR}"
+      else
+        echo "$line"
+      fi
+      in_table=0  # Reset after separator
+    # Regular lines
+    else
+      # Reset table tracking on blank lines (unless we just saw H2)
+      if [[ -z "$line" ]] && [[ $in_table -ne 1 ]]; then
+        in_table=0
+      fi
+      echo "$line"
+    fi
+
+    prev_line="$line"
+  done
+}
