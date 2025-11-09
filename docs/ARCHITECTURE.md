@@ -205,7 +205,7 @@ YAML configuration parsing:
 
 **Functions**:
 - `load_config()` - Parse YAML configuration
-- `get_session_names()` / `get_window_names()` - Name pool retrieval
+- `get_session_names()` - Session name pool retrieval
 
 ## Configuration
 
@@ -218,15 +218,10 @@ display:
 
 naming:
   session_pool: "cities"
-  window_pool: "mammals"
 
   custom_sessions:
     - "dev"
     - "work"
-
-  custom_windows:
-    - "editor"
-    - "terminal"
 ```
 
 **Environment overrides**:
@@ -235,7 +230,6 @@ naming:
 |----------|---------|---------|
 | `TMUX_TOOLS_THEME` | "default" | Override theme |
 | `TMUX_TOOLS_SESSION_POOL` | "cities" | Override session names |
-| `TMUX_TOOLS_WINDOW_POOL` | "mammals" | Override window names |
 | `NO_COLOR` | - | Disable colors |
 
 ## Command Dispatch

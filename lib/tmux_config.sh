@@ -27,7 +27,6 @@ readonly DEFAULT_CONFIG_LOCATIONS=(
 # Configuration variables (set defaults)
 TMUX_TOOLS_THEME="${TMUX_TOOLS_THEME:-default}"
 TMUX_TOOLS_SESSION_POOL="${TMUX_TOOLS_SESSION_POOL:-cities}"
-TMUX_TOOLS_WINDOW_POOL="${TMUX_TOOLS_WINDOW_POOL:-mammals}"
 TMUX_TOOLS_ATTACHMENT_INDICATOR="${TMUX_TOOLS_ATTACHMENT_INDICATOR:-•}"
 TMUX_TOOLS_DEFAULT_FORMAT="${TMUX_TOOLS_DEFAULT_FORMAT:-compact}"
 TMUX_TOOLS_SHOW_TIMESTAMPS="${TMUX_TOOLS_SHOW_TIMESTAMPS:-true}"
@@ -41,16 +40,8 @@ declare -a CITY_NAMES=(
   "boston" "madrid"
 )
 
-declare -a MAMMAL_NAMES=(
-  "cat" "dog" "fox" "bat"
-  "elk" "bear" "lion"
-  "wolf" "seal" "deer"
-  "otter" "mouse"
-)
-
 # Custom name pools (can be overridden by config)
 declare -a CUSTOM_SESSION_NAMES=()
-declare -a CUSTOM_WINDOW_NAMES=()
 
 # Find the first existing configuration file
 find_config_file() {
@@ -168,19 +159,12 @@ load_config() {
 
   # Load naming settings
   TMUX_TOOLS_SESSION_POOL=$(parse_yaml_value "$config_file" "session_pool" "$TMUX_TOOLS_SESSION_POOL")
-  TMUX_TOOLS_WINDOW_POOL=$(parse_yaml_value "$config_file" "window_pool" "$TMUX_TOOLS_WINDOW_POOL")
 
   # Load custom name arrays
   local custom_sessions
   custom_sessions=$(parse_yaml_array "$config_file" "naming" "custom_sessions")
   if [[ -n "$custom_sessions" ]]; then
     readarray -t CUSTOM_SESSION_NAMES <<< "$custom_sessions"
-  fi
-
-  local custom_windows
-  custom_windows=$(parse_yaml_array "$config_file" "naming" "custom_windows")
-  if [[ -n "$custom_windows" ]]; then
-    readarray -t CUSTOM_WINDOW_NAMES <<< "$custom_windows"
   fi
 
   return 0
@@ -198,22 +182,6 @@ get_session_names() {
       ;;
     *)  # "cities" or any other value defaults to cities
       printf '%s\n' "${CITY_NAMES[@]}"
-      ;;
-  esac
-}
-
-# Get window names based on configuration
-get_window_names() {
-  case "$TMUX_TOOLS_WINDOW_POOL" in
-    "custom")
-      if [[ ${#CUSTOM_WINDOW_NAMES[@]} -gt 0 ]]; then
-        printf '%s\n' "${CUSTOM_WINDOW_NAMES[@]}"
-      else
-        printf '%s\n' "${MAMMAL_NAMES[@]}"
-      fi
-      ;;
-    *)  # "mammals" or any other value defaults to mammals
-      printf '%s\n' "${MAMMAL_NAMES[@]}"
       ;;
   esac
 }
@@ -236,20 +204,13 @@ display:
 # Naming settings
 naming:
   session_pool: "cities"        # cities, custom
-  window_pool: "mammals"        # mammals, custom
 
-  # Custom name pools (used when pool is "custom")
+  # Custom session names (used when session_pool is "custom")
   custom_sessions:
     - "dev"
     - "work"
     - "personal"
     - "testing"
-
-  custom_windows:
-    - "editor"
-    - "terminal"
-    - "browser"
-    - "docs"
 
 # Output settings
 output:
@@ -268,7 +229,6 @@ get_config_value() {
   case "$key" in
     "theme") echo "$TMUX_TOOLS_THEME" ;;
     "session_pool") echo "$TMUX_TOOLS_SESSION_POOL" ;;
-    "window_pool") echo "$TMUX_TOOLS_WINDOW_POOL" ;;
     "attachment_indicator") echo "$TMUX_TOOLS_ATTACHMENT_INDICATOR" ;;
     "default_format") echo "$TMUX_TOOLS_DEFAULT_FORMAT" ;;
     "show_timestamps") echo "$TMUX_TOOLS_SHOW_TIMESTAMPS" ;;

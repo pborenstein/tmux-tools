@@ -138,15 +138,10 @@ display:
 
 naming:
   session_pool: "cities"        # cities, custom
-  window_pool: "mammals"        # mammals, custom
 
   custom_sessions:
     - "dev"
     - "work"
-
-  custom_windows:
-    - "editor"
-    - "terminal"
 ```
 
 Generate example config: `tmux-tools config create`

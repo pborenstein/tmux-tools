@@ -12,7 +12,6 @@
 # Environment variables override config file settings:
 #   TMUX_TOOLS_THEME              - Color theme
 #   TMUX_TOOLS_SESSION_POOL       - Session naming pool
-#   TMUX_TOOLS_WINDOW_POOL        - Window naming pool
 #   TMUX_TOOLS_ATTACHMENT_INDICATOR - Attachment symbol
 #   NO_COLOR                      - Disable all colors when set
 
@@ -43,12 +42,6 @@ naming:
   # - custom: Use custom_sessions list below
   session_pool: "cities"
 
-  # Window naming pool (DEPRECATED - windows now use directory names)
-  # Windows are automatically named based on the active pane's current directory
-  # This setting is kept for backward compatibility but has no effect
-  # Options: mammals, custom (deprecated)
-  window_pool: "mammals"
-
   # Custom session names (used when session_pool: "custom")
   # Provide your own list of session names
   # Names should be short and memorable
@@ -59,17 +52,6 @@ naming:
     - "testing"
     - "admin"
     - "monitor"
-
-  # Custom window names (DEPRECATED - windows now use directory names)
-  # Windows are automatically named from the active pane's directory
-  # This setting is kept for backward compatibility but has no effect
-  custom_windows:
-    - "editor"
-    - "terminal"
-    - "browser"
-    - "docs"
-    - "logs"
-    - "build"
 
 # Output settings
 output:
@@ -111,14 +93,8 @@ output:
 # Configuration for project-specific naming:
 # naming:
 #   session_pool: "custom"
-#   window_pool: "custom"
 #   custom_sessions:
 #     - "frontend"
 #     - "backend"
 #     - "database"
 #     - "devops"
-#   custom_windows:
-#     - "code"
-#     - "test"
-#     - "server"
-#     - "debug"
