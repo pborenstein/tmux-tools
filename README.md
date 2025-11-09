@@ -11,32 +11,41 @@ export PATH="$HOME/.tmux-tools:$PATH"
 
 # Or symlink to a directory already in PATH
 ln -s ~/.tmux-tools/tmux-tools /usr/local/bin/tmux-tools
+ln -s ~/.tmux-tools/tt /usr/local/bin/tt  # Optional: short alias
 ```
 
 Add the export to your `.bashrc` or `.zshrc` for persistence.
 
+The `tt` command is a short alias for `tmux-tools` - use whichever you prefer!
+
 ## Quick Start
 
 ```bash
-tmux-tools status                    # See all sessions/windows/panes
+tmux-tools                           # Show status (default command)
+tt status                            # Same as above using short alias
 tmux-tools overview                  # Tree view with summary
 tmux-tools rename auto               # Clean up default names
+tmux-tools help                      # Show tmux command reference
+tmux-tools help sessions             # Show session commands
 ```
 
 ## Commands
 
 | Command | Description | Common Options |
 |---------|-------------|----------------|
-| `status` | Compact table of all sessions | `--show-pid`, `--rename-auto` |
+| `status` | Compact table of all sessions (default) | `--show-pid`, `--rename-auto` |
 | `overview` | Tree view of sessions | `--detailed`, `--json`, `-s <session>` |
 | `rename` | Rename sessions/windows | `sessions`, `windows`, `auto` |
 | `config` | Manage configuration | `show`, `create`, `edit` |
+| `help` | Show tmux command reference | `sessions`, `windows`, `panes`, `layouts` |
 
 ## Features
 
 - Tabular display fits more information on screen
-- Smart renaming: cities for sessions, mammals for windows
+- Smart renaming: cities for sessions, directory names for windows
 - Client width column shows device type (89 = iPad, 142+ = desktop)
+- Short `tt` alias for quick access
+- Built-in tmux command reference via `help` command
 - JSON output for scripting
 - YAML config for custom name pools and themes
 - Multiple color schemes
@@ -64,11 +73,19 @@ tmux-tools overview --detailed
 tmux-tools overview --json | jq '.sessions[].name'
 ```
 
-**Rename default sessions:**
+**Rename sessions and windows:**
 ```bash
-tmux-tools rename auto              # Only rename auto-generated names
-tmux-tools rename sessions          # Rename all sessions
-tmux-tools rename windows           # Rename all windows
+tmux-tools rename auto              # Rename sessions to cities, windows to dirs
+tmux-tools rename sessions          # Rename all sessions to city names
+tmux-tools rename windows           # Rename all windows to directory names
+```
+
+**Get help and command reference:**
+```bash
+tmux-tools help                     # Show full tmux command reference
+tmux-tools help sessions            # Show session-specific commands
+tmux-tools help windows             # Show window-specific commands
+tt help panes                       # Show pane commands (using short alias)
 ```
 
 ## Output
@@ -127,9 +144,9 @@ Generate example config: `tmux-tools config create`
 
 ## Naming
 
-Sessions: rio, oslo, lima, bern, cairo, tokyo, paris, milan, berlin, sydney, boston, madrid
+**Sessions:** rio, oslo, lima, bern, cairo, tokyo, paris, milan, berlin, sydney, boston, madrid
 
-Windows: cat, dog, fox, bat, elk, bear, lion, wolf, seal, deer, otter, mouse
+**Windows:** Automatically named based on the active pane's current directory (e.g., `/home/user/my-project` becomes `my-project`). Directory names are truncated to 20 characters maximum.
 
 Conflicts are resolved by advancing to the next available name. No number suffixes.
 
