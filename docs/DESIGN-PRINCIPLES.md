@@ -9,12 +9,12 @@ Tmux sessions accumulate with unhelpful default names. Terminal space is wasted 
 ## Solution: Compact Tabular Display
 
 ```
-session       win  name      p  cmd      w
--------       ---  --------  -  -------  ---
-oslo          0    elk       0  fish     142
-              0              1  fish
-              1    cat       0  node
-milan         0    mouse     0  fish     89
+session       win  name        p  cmd      w
+-------       ---  ----------  -  -------  ---
+oslo          0    projects    0  fish     142
+              0                1  fish
+              1    docs        0  node
+milan         0    scripts     0  fish     89
 ```
 
 **Benefits**:
@@ -46,12 +46,12 @@ Show what's needed most often:
 - Essential info always visible
 - Full details available with flags
 
-### 4. Memorable Naming
+### 4. Contextual Naming
 
-Natural names scale better than numbers:
+Names that convey meaning:
 - Cities for sessions: tokyo, berlin, oslo
-- Mammals for windows: cat, bear, fox
-- No number suffixes, advance to next name
+- Directory names for windows: projects, docs, scripts
+- No number suffixes, advance to next name on conflicts
 
 ### 5. Respectful Enhancement
 
@@ -73,7 +73,8 @@ Use spacing to show relationships:
 |----------|-----------|
 | Tabular format | Higher information density than trees |
 | Column order: session → window → pane → command → width | Hierarchy from general to specific |
-| Cities/mammals naming | Natural variety, memorable, pleasant |
+| Cities for sessions | Natural variety, memorable, pleasant |
+| Directory names for windows | Contextual meaning, shows what you're working on |
 | Hide PIDs by default | Show on demand with `--show-pid` |
 | Advance names on conflict | No ugly "tokyo-1" suffixes |
 

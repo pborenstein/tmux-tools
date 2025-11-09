@@ -194,3 +194,63 @@ format_elapsed_time() {
     echo "$((elapsed / 86400))d"
   fi
 }
+
+# Get the active pane's directory for a window
+# Args: session_name window_index
+get_window_active_pane_dir() {
+  local session_name="$1"
+  local window_index="$2"
+
+  # Get the current path of the active pane in the window
+  local pane_path
+  pane_path=$(tmux list-panes -t "${session_name}:${window_index}" \
+    -F "#{pane_active} #{pane_current_path}" 2>/dev/null | \
+    grep "^1 " | cut -d' ' -f2-)
+
+  echo "$pane_path"
+}
+
+# Extract and format directory name for window naming
+# Args: directory_path [max_length]
+format_directory_name() {
+  local dir_path="$1"
+  local max_length="${2:-20}"
+
+  # Return empty if no path provided
+  if [[ -z "$dir_path" ]]; then
+    echo ""
+    return
+  fi
+
+  # Get the basename of the directory
+  local dir_name
+  dir_name=$(basename "$dir_path")
+
+  # Handle home directory specially
+  if [[ "$dir_path" == "$HOME" ]]; then
+    dir_name="home"
+  fi
+
+  # Truncate if longer than max_length
+  if [[ ${#dir_name} -gt $max_length ]]; then
+    dir_name="${dir_name:0:$max_length}"
+  fi
+
+  echo "$dir_name"
+}
+
+# Get a smart name for a window based on its active pane's directory
+# Args: session_name window_index
+get_smart_window_name() {
+  local session_name="$1"
+  local window_index="$2"
+
+  local pane_dir
+  pane_dir=$(get_window_active_pane_dir "$session_name" "$window_index")
+
+  local window_name
+  window_name=$(format_directory_name "$pane_dir" 20)
+
+  # If we couldn't get a directory name, return empty (caller will handle fallback)
+  echo "$window_name"
+}

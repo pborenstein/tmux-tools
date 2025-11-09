@@ -23,13 +23,13 @@
 #   --no-rename         Skip all session renaming operations. Only display status.
 #                       This is the default behavior.
 #
-#   --rename-auto       Rename sessions that are not city names and windows that
-#                       are not mammal names to unused names, then display status.
+#   --rename-auto       Rename sessions that are not city names and windows based
+#                       on their active pane's directory, then display status.
 #                       This combines session and window renaming in one command.
 #
 #   --rename-sessions   Rename ALL existing sessions to random city names.
 #
-#   --rename-windows    Rename ALL windows to random mammal names.
+#   --rename-windows    Rename ALL windows based on their active pane's current directory.
 #
 #   --show-pid          Show PID and path columns (hidden by default).
 #
@@ -54,17 +54,18 @@
 # USAGE EXAMPLES:
 #   ./tmux-status.sh                    # Show compact status (default)
 #   ./tmux-status.sh --show-pid         # Show detailed status with PID and paths
-#   ./tmux-status.sh --rename-auto      # Rename non-city/non-mammal names
+#   ./tmux-status.sh --rename-auto      # Rename sessions to cities, windows to directories
 #   ./tmux-status.sh --rename-sessions  # Rename all sessions to city names
-#   ./tmux-status.sh --rename-windows   # Rename all windows to mammal names
+#   ./tmux-status.sh --rename-windows   # Rename all windows to directory names
 #
-# RENAMING POOLS:
+# RENAMING BEHAVIOR:
 #   City names for sessions (3-8 letters, lowercase):
 #   rio, oslo, lima, bern, cairo, tokyo, paris, milan, berlin, sydney,
 #   boston, madrid
 #
-#   Mammal names for windows (3-8 letters, lowercase):
-#   cat, dog, fox, bat, elk, bear, lion, wolf, seal, deer, otter, mouse
+#   Directory-based names for windows:
+#   Windows are renamed to the basename of their active pane's current directory,
+#   truncated to 20 characters max. For example: /home/user/my-project -> my-project
 #
 # BEHAVIOR NOTES:
 #   - Compact layout by default maximizes screen real estate
@@ -117,18 +118,18 @@ OPTIONS:
   --help, -h          Show this help message
   --theme THEME       Color theme (default, vibrant, subtle, monochrome, none)
   --no-rename         Skip all session renaming (default)
-  --rename-auto       Rename non-city sessions and non-mammal windows (both)
+  --rename-auto       Rename sessions to cities, windows to directory names
   --rename-sessions   Rename ALL sessions to random city names
-  --rename-windows    Rename all windows to random mammal names
+  --rename-windows    Rename all windows to their active pane's directory name
   --show-pid          Show PID and path columns (hidden by default)
 
 EXAMPLES:
   ./tmux-status.sh                    # Show compact status
   ./tmux-status.sh --show-pid         # Show status with PID and path details
   ./tmux-status.sh --theme vibrant    # Use vibrant color theme
-  ./tmux-status.sh --rename-auto      # Rename non-city/non-mammal names
-  ./tmux-status.sh --rename-sessions  # Rename all sessions
-  ./tmux-status.sh --rename-windows   # Rename all windows to mammals
+  ./tmux-status.sh --rename-auto      # Rename sessions to cities, windows to dirs
+  ./tmux-status.sh --rename-sessions  # Rename all sessions to city names
+  ./tmux-status.sh --rename-windows   # Rename all windows to directory names
 EOF
       exit 0
       ;;
@@ -288,50 +289,15 @@ if [ "$rename_windows" = true ]; then
       continue
     fi
 
-    # Create a shuffled copy of window names array for this session
-    shuffled_windows=$(printf '%s\n' "${window_names[@]}" | sort -R)
-
-    # Get existing window names in this session to avoid conflicts
-    existing_names=$(echo "$windows" | cut -d' ' -f2-)
-
-    window_index=0
     echo "$windows" | while read -r win_index win_name; do
-      # Check if window name is already a valid window name
-      window_is_valid=false
-      for valid_name in "${window_names[@]}"; do
-        if [[ "$win_name" == "$valid_name" ]]; then
-          window_is_valid=true
-          break
+      # Get smart name based on active pane's directory
+      new_name=$(get_smart_window_name "$session" "$win_index")
+
+      # Only rename if we got a valid name and it's different from current
+      if [[ -n "$new_name" && "$new_name" != "$win_name" ]]; then
+        if ! rename_window "$session" "$win_index" "$new_name"; then
+          echo "Warning: Failed to rename window '${session}:${win_index}' to '$new_name'" >&2
         fi
-      done
-
-      # Only rename if window name is not already valid
-      if [[ "$window_is_valid" == false ]]; then
-        # Find next available window name
-        while true; do
-          new_name=$(echo "$shuffled_windows" | sed -n "$((window_index + 1))p")
-
-          # If we run out of names, cycle back to the beginning
-          if [ -z "$new_name" ]; then
-            window_index=0
-            new_name=$(echo "$shuffled_windows" | sed -n "1p")
-          fi
-
-          # Check if this name is already used in this session
-          if ! echo "$existing_names" | grep -q "^${new_name}$"; then
-            break
-          fi
-
-          window_index=$((window_index + 1))
-        done
-
-        if [ "$new_name" != "$win_name" ]; then
-          if ! rename_window "$session" "$win_index" "$new_name"; then
-            echo "Warning: Failed to rename window '${session}:${win_index}' to '$new_name'" >&2
-          fi
-        fi
-
-        window_index=$((window_index + 1))
       fi
     done
   done

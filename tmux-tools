@@ -54,26 +54,33 @@ tmux-tools - Unified interface for tmux session management tools
 
 USAGE:
     tmux-tools <command> [options]
+    tt <command> [options]              # Short alias
 
 COMMANDS:
-    status          Show tmux session status in tabular format
-    overview        Show comprehensive session overview
-    rename          Rename sessions and windows
-    config          Manage configuration settings
-    help            Show help information
-    version         Show version information
+    status, s, stat     Show tmux session status in tabular format (default)
+    overview, o, ov     Show comprehensive session overview
+    rename, r, ren      Rename sessions and windows
+    config, c, conf     Manage configuration settings
+    help, h             Show tmux command reference and help
+    version, v, ver     Show version information
 
 EXAMPLES:
     tmux-tools status                    # Show compact status
-    tmux-tools status --show-pid         # Show detailed status with PIDs
-    tmux-tools overview --detailed       # Show detailed overview
-    tmux-tools overview --json           # Output in JSON format
-    tmux-tools rename sessions          # Rename all sessions
-    tmux-tools rename --auto             # Smart auto-rename
-    tmux-tools config show              # Show current configuration
-    tmux-tools config create            # Create example config file
+    tt s --show-pid                      # Show detailed status (short form)
+    tt stat                              # Show status (alternate short form)
+    tt o --detailed                      # Show detailed overview (short form)
+    tt ov --json                         # Output overview in JSON (short form)
+    tt r sessions                        # Rename all sessions (short form)
+    tt ren auto                          # Smart auto-rename (short form)
+    tt c                                 # Show current configuration (short form)
+    tt conf create                       # Create config file (short form)
+    tt h                                 # Show tmux command reference
+    tt h ses                             # Show session commands
+    tt h win                             # Show window commands
+    tt v                                 # Show version (short form)
 
 Use 'tmux-tools <command> --help' for more information on a specific command.
+Use 'tt h <topic>' for tmux command reference (ses, win, pan, layouts, copy, misc)
 EOF
 }
 
@@ -112,21 +119,27 @@ cmd_rename() {
 tmux-tools rename - Rename sessions and windows
 
 USAGE:
-    tmux-tools rename <subcommand> [options]
+    tmux-tools rename [subcommand] [options]
 
 SUBCOMMANDS:
     sessions        Rename ALL sessions to city names
-    windows         Rename ALL windows to mammal names
-    auto, --auto    Smart rename: only rename non-standard names
+    windows         Rename ALL windows to directory names
+    auto, --auto    Smart rename: cities for sessions, directories for windows
 
 EXAMPLES:
+    tmux-tools rename               # Show this help
     tmux-tools rename sessions      # Rename all sessions to cities
-    tmux-tools rename windows       # Rename all windows to mammals
-    tmux-tools rename auto          # Smart rename non-standard names
+    tmux-tools rename windows       # Rename all windows to directory names
+    tmux-tools rename auto          # Smart rename (cities + directories)
 
-The rename command uses the naming pools configured in your
-tmux-tools configuration file (~/.tmux-tools.yaml).
+The rename command uses directory names from the active pane's current
+working directory for windows, and city names configured in your
+tmux-tools configuration file (~/.tmux-tools.yaml) for sessions.
 EOF
+      ;;
+    "")
+      # Show help when no subcommand provided
+      cmd_rename --help
       ;;
     *)
       echo "Error: Unknown rename subcommand '$subcommand'" >&2
@@ -194,14 +207,15 @@ cmd_config() {
 tmux-tools config - Manage configuration settings
 
 USAGE:
-    tmux-tools config <subcommand>
+    tmux-tools config [subcommand]
 
 SUBCOMMANDS:
-    show            Show current configuration settings
+    show            Show current configuration settings (default)
     create          Create an example configuration file
     edit            Edit the configuration file
 
 EXAMPLES:
+    tmux-tools config               # Show current settings (default)
     tmux-tools config show          # Show current settings
     tmux-tools config create        # Create ~/.tmux-tools.yaml
     tmux-tools config edit          # Edit configuration file
@@ -214,6 +228,10 @@ Configuration files are searched in this order:
   ./tmux-tools.yaml
   ./tmux-tools.yml
 EOF
+      ;;
+    "")
+      # Default to show when no subcommand provided
+      cmd_config show
       ;;
     *)
       echo "Error: Unknown config subcommand '$subcommand'" >&2
@@ -240,16 +258,65 @@ cmd_help() {
     config)
       cmd_config --help
       ;;
+    commands)
+      # Show full COMMANDS.md reference
+      if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
+        less "$SCRIPT_DIR/docs/COMMANDS.md"
+      else
+        echo "Error: COMMANDS.md not found" >&2
+        exit 1
+      fi
+      ;;
+    sessions|ses|windows|win|panes|pan|layouts|copy|misc)
+      # Show specific section from COMMANDS.md
+      if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
+        # Map topic to section name (bash 3.x compatible)
+        local section_name
+        case "$topic" in
+          sessions|ses) section_name="Sessions" ;;
+          windows|win) section_name="Windows" ;;
+          panes|pan) section_name="Panes" ;;
+          layouts) section_name="Layouts" ;;
+          copy) section_name="Copy Mode" ;;
+          misc) section_name="Miscellaneous" ;;
+        esac
+
+        # Extract the section using awk
+        awk -v section="$section_name" '
+          /^## / {
+            if (found) exit
+            if ($0 ~ "## " section) found=1
+          }
+          found { print }
+        ' "$SCRIPT_DIR/docs/COMMANDS.md" | less
+      else
+        echo "Error: COMMANDS.md not found" >&2
+        exit 1
+      fi
+      ;;
+    "")
+      # Show COMMANDS.md by default when no topic specified
+      if [[ -f "$SCRIPT_DIR/docs/COMMANDS.md" ]]; then
+        less "$SCRIPT_DIR/docs/COMMANDS.md"
+      else
+        echo "Error: COMMANDS.md not found" >&2
+        show_main_help
+      fi
+      ;;
     *)
-      show_main_help
+      echo "Error: Unknown help topic '$topic'" >&2
+      echo "Available topics: commands, sessions (ses), windows (win), panes (pan), layouts, copy, misc" >&2
+      echo "Or use: status, overview, rename, config for command-specific help" >&2
+      exit 1
       ;;
   esac
 }
 
 # Main command dispatcher
 main() {
+  # Default to status command if no arguments provided
   if [[ $# -eq 0 ]]; then
-    show_main_help
+    cmd_status
     exit 0
   fi
 
@@ -257,22 +324,25 @@ main() {
   shift
 
   case "$command" in
-    status)
+    status|s|stat)
       cmd_status "$@"
       ;;
-    overview)
+    overview|o|ov)
       cmd_overview "$@"
       ;;
-    rename)
+    rename|r|ren)
       cmd_rename "$@"
       ;;
-    config)
+    config|c|conf)
       cmd_config "$@"
       ;;
-    help|--help|-h)
+    help|h)
       cmd_help "$@"
       ;;
-    version|--version|-v)
+    --help|-h)
+      show_main_help
+      ;;
+    version|v|ver|--version|-v)
       show_version
       ;;
     *)

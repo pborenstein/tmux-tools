@@ -5,10 +5,11 @@
 | File | Description | Audience |
 |------|-------------|----------|
 | [../README.md](../README.md) | Installation, quick start, usage | Users |
+| [COMMANDS.md](COMMANDS.md) | Tmux command reference tables | Users |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Technical architecture, implementation | Developers |
 | [DESIGN-PRINCIPLES.md](DESIGN-PRINCIPLES.md) | Design philosophy | Developers |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Common issues and solutions | Users |
-| [ROADMAP.md](ROADMAP.md) | Planned improvements | Contributors |
+| [ROADMAP.md](ROADMAP.md) | Planned and completed improvements | Contributors |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guidelines | Contributors |
 
 ## Quick Paths
