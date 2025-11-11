@@ -372,6 +372,10 @@ print_client_row() {
 
   # Format TTY (strip /dev/ prefix and truncate)
   local tty_short="${tty#/dev/}"
+  # Handle empty TTY for control mode clients
+  if [[ -z "$tty_short" ]]; then
+    tty_short="-"
+  fi
   tty_short=$(printf "%-13s" "$tty_short")
 
   # Format dimensions
@@ -410,12 +414,8 @@ print_client_row() {
   # TTY (13 chars)
   formatted_row+="$tty_short  "
 
-  # Created time (7 chars)
-  if [[ -n "$gray_color" ]]; then
-    formatted_row+=$(printf "%b%-7s%b" "$gray_color" "$created" "$reset_color")
-  else
-    formatted_row+=$(printf "%-7s" "$created")
-  fi
+  # Created time (7 chars) - plain text, no color
+  formatted_row+=$(printf "%-7s" "$created")
   formatted_row+="  "
 
   # Activity time (8 chars)
