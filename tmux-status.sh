@@ -103,6 +103,7 @@ no_rename=true  # Default: no renaming
 rename_sessions=false
 rename_windows=false
 show_pid=false
+show_clients=false
 theme_override=""
 
 while [[ $# -gt 0 ]]; do
@@ -122,10 +123,12 @@ OPTIONS:
   --rename-sessions   Rename ALL sessions to random city names
   --rename-windows    Rename all windows to their active pane's directory name
   --show-pid          Show PID and path columns (hidden by default)
+  --show-clients      Show client connection information (TTY, timestamps, size)
 
 EXAMPLES:
   ./tmux-status.sh                    # Show compact status
   ./tmux-status.sh --show-pid         # Show status with PID and path details
+  ./tmux-status.sh --show-clients     # Show all client connections
   ./tmux-status.sh --theme vibrant    # Use vibrant color theme
   ./tmux-status.sh --rename-auto      # Rename sessions to cities, windows to dirs
   ./tmux-status.sh --rename-sessions  # Rename all sessions to city names
@@ -161,6 +164,10 @@ EOF
       ;;
     --show-pid)
       show_pid=true
+      shift
+      ;;
+    --show-clients)
+      show_clients=true
       shift
       ;;
     *)
@@ -294,6 +301,36 @@ if [ "$rename_windows" = true ]; then
       fi
     done
   done
+fi
+
+# If show_clients flag is set, display client information and exit
+if [ "$show_clients" = true ]; then
+  # Get detailed client data
+  client_info=$(get_detailed_client_data)
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to get tmux client information" >&2
+    exit 1
+  fi
+
+  if [ -z "$client_info" ]; then
+    echo "No tmux clients found"
+    exit 0
+  fi
+
+  # Print client header
+  print_client_header
+
+  # Process and display each client
+  echo "$client_info" | while IFS='|' read -r tty pid session termname created activity width height user control_mode; do
+    # Format timestamps
+    created_time=$(format_time_hhmm "$created")
+    activity_time=$(format_time_hhmm "$activity")
+
+    # Print client row
+    print_client_row "$session" "$tty" "$created_time" "$activity_time" "$width" "$height" "$control_mode" "$user"
+  done
+
+  exit 0
 fi
 
 # Print header

@@ -349,3 +349,93 @@ get_background_color() {
     echo ""
   fi
 }
+
+# Print client info header
+print_client_header() {
+  echo "TMUX CLIENTS $(date)"
+  echo
+  echo "session       tty            created  activity  size      ctrl  user"
+  echo "-------       -----------    -------  --------  --------  ----  ----"
+}
+
+# Print client info row
+# Args: session tty created activity width height control_mode user
+print_client_row() {
+  local session="$1"
+  local tty="$2"
+  local created="$3"
+  local activity="$4"
+  local width="$5"
+  local height="$6"
+  local control_mode="$7"
+  local user="$8"
+
+  # Format TTY (strip /dev/ prefix and truncate)
+  local tty_short="${tty#/dev/}"
+  tty_short=$(printf "%-13s" "$tty_short")
+
+  # Format dimensions
+  local size=$(printf "%4sx%-4s" "$width" "$height")
+
+  # Format control mode indicator
+  local ctrl_indicator=""
+  if [[ "$control_mode" == "1" ]] || [[ "$width" == "0" ]]; then
+    ctrl_indicator="+"
+  fi
+
+  # Determine colors
+  local session_color=""
+  local info_color=""
+  local gray_color=""
+  local reset_color=""
+
+  if colors_supported; then
+    session_color=$(get_color "session")
+    info_color=$(get_color "info")
+    gray_color=$(get_color "gray")
+    reset_color=$(get_color "reset")
+  fi
+
+  # Build formatted row
+  local formatted_row=""
+
+  # Session (13 chars)
+  if [[ -n "$session_color" ]]; then
+    formatted_row+=$(pad_colored "$session" 13 "$session_color" "$reset_color")
+  else
+    formatted_row+=$(printf "%-13s" "$session")
+  fi
+  formatted_row+=" "
+
+  # TTY (13 chars)
+  formatted_row+="$tty_short  "
+
+  # Created time (7 chars)
+  if [[ -n "$gray_color" ]]; then
+    formatted_row+=$(printf "%b%-7s%b" "$gray_color" "$created" "$reset_color")
+  else
+    formatted_row+=$(printf "%-7s" "$created")
+  fi
+  formatted_row+="  "
+
+  # Activity time (8 chars)
+  if [[ -n "$info_color" ]]; then
+    formatted_row+=$(pad_colored "$activity" 8 "$info_color" "$reset_color")
+  else
+    formatted_row+=$(printf "%-8s" "$activity")
+  fi
+  formatted_row+="  "
+
+  # Size (9 chars)
+  formatted_row+=$(printf "%-9s" "$size")
+  formatted_row+=" "
+
+  # Control mode (4 chars)
+  formatted_row+=$(printf "%-4s" "$ctrl_indicator")
+  formatted_row+="  "
+
+  # User
+  formatted_row+="$user"
+
+  printf "%b\n" "$formatted_row"
+}

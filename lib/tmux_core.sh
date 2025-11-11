@@ -102,6 +102,23 @@ get_session_control_mode() {
   fi
 }
 
+# Get detailed client data
+# Returns: tty|pid|session|termname|created|activity|width|height|user|control_mode
+get_detailed_client_data() {
+  tmux list-clients -F "#{client_tty}|#{client_pid}|#{client_session}|#{client_termname}|#{client_created}|#{client_activity}|#{client_width}|#{client_height}|#{client_user}|#{client_control_mode}" 2>/dev/null || return 1
+}
+
+# Format timestamp to HH:MM
+# Args: timestamp
+format_time_hhmm() {
+  local timestamp="$1"
+  if command -v gdate >/dev/null 2>&1; then
+    gdate -d "@$timestamp" "+%H:%M" 2>/dev/null || echo "??:??"
+  else
+    date -r "$timestamp" "+%H:%M" 2>/dev/null || echo "??:??"
+  fi
+}
+
 # Get attachment indicator for a session
 # Args: session_name
 get_attachment_indicator() {
