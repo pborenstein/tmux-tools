@@ -201,7 +201,7 @@ format_control_mode_display() {
 
   if [[ "$session_name" != "$last_session" ]]; then
     if [[ "$control_mode" == "1" ]]; then
-      echo "C"
+      echo "+"
     else
       echo ""
     fi

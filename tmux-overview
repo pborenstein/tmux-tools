@@ -235,7 +235,7 @@ output_summary() {
     control_mode_status=$(get_session_control_mode "$session_name")
     local control_mode_indicator=""
     if [[ "$control_mode_status" == "1" ]]; then
-      control_mode_indicator="C"
+      control_mode_indicator="+"
     fi
 
     # Determine background color (alternate sessions)
@@ -290,7 +290,7 @@ output_detailed() {
     control_mode_status=$(get_session_control_mode "$session_name")
     local control_mode_indicator=""
     if [[ "$control_mode_status" == "1" ]]; then
-      control_mode_indicator="C"
+      control_mode_indicator="+"
     fi
 
     # Determine background color (alternate sessions)
