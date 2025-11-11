@@ -5,6 +5,38 @@ All notable changes to tmux-tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-11-11
+
+### Added
+- **Control mode indicator** (`+`) for sessions with control mode clients
+  - Displays in status view, overview (both summary and detailed)
+  - Detects control mode via `#{client_control_mode}` flag or `0x0` client dimensions
+  - New `get_session_control_mode()` function in `tmux_core.sh`
+  - New `format_control_mode_display()` function in `tmux_display.sh`
+- **Client information view** with `--show-clients` flag
+  - Shows all tmux client connections including detached sessions
+  - Displays TTY, created/activity timestamps (HH:MM format), dimensions, control mode, and user
+  - Detached sessions shown with `-` placeholders for clarity
+  - New `get_detailed_client_data()` function to fetch comprehensive client info
+  - New `format_time_hhmm()` function for timestamp formatting
+  - New `print_client_header()` and `print_client_row()` functions for client display
+- **Client dimensions in WxH format**
+  - Status view now shows dimensions as "172x53" instead of just width
+  - New `get_current_client_size()` function for current client dimensions
+  - Renamed `get_session_width()` to `get_session_size()` for WxH output
+  - Updated `get_client_data()` to fetch both width and height
+
+### Changed
+- Status header column changed from "w" to "size" with adjusted spacing
+- Control mode indicator changed from "C" to "+" for cleaner display
+- Updated all display functions to handle control mode indicator parameter
+- Client data now includes both width and height by default
+- Created timestamp in client view displays without dark color for better visibility
+
+### Fixed
+- Empty TTY values for control mode clients now display as "-"
+- All sessions shown in `--show-clients` view, including detached ones
+
 ## [1.2.0] - 2025-11-09
 
 ### Added
@@ -79,6 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple color schemes
 - Backward compatible with original scripts
 
+[1.3.0]: https://github.com/pborenstein/tmux-tools/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/pborenstein/tmux-tools/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/pborenstein/tmux-tools/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/pborenstein/tmux-tools/compare/v1.0.0...v1.1.0

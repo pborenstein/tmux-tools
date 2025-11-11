@@ -2,6 +2,13 @@
 
 ## Recently Completed
 
+**Client information and control mode (v1.3.0)**:
+- Control mode indicator (`+`) for sessions with control mode clients
+- `--show-clients` flag to display detailed client connection info
+- Client dimensions in WxH format (e.g., 172x53) instead of just width
+- Shows TTY, timestamps (HH:MM), dimensions, control mode, and user info
+- Detached sessions visible in client view with clear placeholders
+
 **Usability improvements**:
 - Short command aliases (`s`, `stat`, `o`, `ov`, `r`, `ren`, `c`, `conf`, `h`, `v`, `ver`)
 - Help topic shortcuts (`ses`, `win`, `pan`)
