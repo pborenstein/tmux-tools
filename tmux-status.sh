@@ -305,29 +305,43 @@ fi
 
 # If show_clients flag is set, display client information and exit
 if [ "$show_clients" = true ]; then
-  # Get detailed client data
-  client_info=$(get_detailed_client_data)
+  # Get all sessions
+  all_sessions=$(get_session_data "#{session_name}")
   if [ $? -ne 0 ]; then
-    echo "Error: Failed to get tmux client information" >&2
+    echo "Error: Failed to get tmux session list" >&2
     exit 1
   fi
 
-  if [ -z "$client_info" ]; then
-    echo "No tmux clients found"
+  if [ -z "$all_sessions" ]; then
+    echo "No tmux sessions found"
     exit 0
   fi
+
+  # Get detailed client data
+  client_info=$(get_detailed_client_data)
 
   # Print client header
   print_client_header
 
-  # Process and display each client
-  echo "$client_info" | while IFS='|' read -r tty pid session termname created activity width height user control_mode; do
-    # Format timestamps
-    created_time=$(format_time_hhmm "$created")
-    activity_time=$(format_time_hhmm "$activity")
+  # Process each session
+  echo "$all_sessions" | while read -r session_name; do
+    # Check if this session has any clients
+    session_clients=$(echo "$client_info" | grep "^[^|]*|[^|]*|${session_name}|")
 
-    # Print client row
-    print_client_row "$session" "$tty" "$created_time" "$activity_time" "$width" "$height" "$control_mode" "$user"
+    if [ -n "$session_clients" ]; then
+      # Session has clients, display them
+      echo "$session_clients" | while IFS='|' read -r tty pid session termname created activity width height user control_mode; do
+        # Format timestamps
+        created_time=$(format_time_hhmm "$created")
+        activity_time=$(format_time_hhmm "$activity")
+
+        # Print client row
+        print_client_row "$session" "$tty" "$created_time" "$activity_time" "$width" "$height" "$control_mode" "$user"
+      done
+    else
+      # Session has no clients, show as detached
+      print_client_row "$session_name" "" "-" "-" "-" "-" "0" "$USER"
+    fi
   done
 
   exit 0
