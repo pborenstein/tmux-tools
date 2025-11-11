@@ -346,11 +346,18 @@ echo "$pane_data" | while read -r session win_index win_name pane_index pid cmd 
   # Get client width for this session (only show on first line of session)
   width_display=$(format_width_display "$session" "$last_session" "$(get_session_width "$session" "$client_data")")
 
+  # Get control mode status for this session (only show on first line of session)
+  control_mode_display=""
+  if [ "$session" != "$last_session" ]; then
+    control_mode_status=$(get_session_control_mode "$session")
+    control_mode_display=$(format_control_mode_display "$session" "$last_session" "$control_mode_status")
+  fi
+
   # Print output based on show_pid flag
   if [ "$show_pid" = true ]; then
-    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$pid" "$path"
+    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$control_mode_display" "$pid" "$path"
   else
-    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display"
+    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$control_mode_display"
   fi
 
   last_session="$session"

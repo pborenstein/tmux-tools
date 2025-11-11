@@ -83,6 +83,25 @@ get_client_data() {
   tmux list-clients -F "$format" 2>/dev/null || return 1
 }
 
+# Get control mode status for a session
+# Returns "1" if session has any control mode clients, "0" otherwise
+# Args: session_name
+get_session_control_mode() {
+  local session_name="$1"
+  local control_mode_clients
+
+  # Get all clients for this session and check for control mode
+  control_mode_clients=$(tmux list-clients -F "#{client_session} #{client_control_mode} #{client_width}x#{client_height}" 2>/dev/null | \
+    grep "^$session_name " | \
+    awk '{if ($2 == "1" || $3 == "0x0") print "1"}')
+
+  if [[ -n "$control_mode_clients" ]]; then
+    echo "1"
+  else
+    echo "0"
+  fi
+}
+
 # Get attachment indicator for a session
 # Args: session_name
 get_attachment_indicator() {
