@@ -77,10 +77,46 @@ get_pane_data() {
 }
 
 # Get client data
-# Default format: "#{client_session} #{client_width}"
+# Default format: "#{client_session} #{client_width} #{client_height}"
 get_client_data() {
-  local format="${1:-#{client_session} #{client_width}}"
+  local format="${1:-#{client_session} #{client_width} #{client_height}}"
   tmux list-clients -F "$format" 2>/dev/null || return 1
+}
+
+# Get control mode status for a session
+# Returns "1" if session has any control mode clients, "0" otherwise
+# Args: session_name
+get_session_control_mode() {
+  local session_name="$1"
+  local control_mode_clients
+
+  # Get all clients for this session and check for control mode
+  control_mode_clients=$(tmux list-clients -F "#{client_session} #{client_control_mode} #{client_width}x#{client_height}" 2>/dev/null | \
+    grep "^$session_name " | \
+    awk '{if ($2 == "1" || $3 == "0x0") print "1"}')
+
+  if [[ -n "$control_mode_clients" ]]; then
+    echo "1"
+  else
+    echo "0"
+  fi
+}
+
+# Get detailed client data
+# Returns: tty|pid|session|termname|created|activity|width|height|user|control_mode
+get_detailed_client_data() {
+  tmux list-clients -F "#{client_tty}|#{client_pid}|#{client_session}|#{client_termname}|#{client_created}|#{client_activity}|#{client_width}|#{client_height}|#{client_user}|#{client_control_mode}" 2>/dev/null || return 1
+}
+
+# Format timestamp to HH:MM
+# Args: timestamp
+format_time_hhmm() {
+  local timestamp="$1"
+  if command -v gdate >/dev/null 2>&1; then
+    gdate -d "@$timestamp" "+%H:%M" 2>/dev/null || echo "??:??"
+  else
+    date -r "$timestamp" "+%H:%M" 2>/dev/null || echo "??:??"
+  fi
 }
 
 # Get attachment indicator for a session
@@ -103,14 +139,21 @@ get_current_session() {
   tmux display-message -p '#{session_name}' 2>/dev/null || echo ""
 }
 
-# Get current client width
-get_current_client_width() {
-  tmux display-message -p '#{client_width}' 2>/dev/null || echo ""
+# Get current client dimensions (WxH format)
+get_current_client_size() {
+  local width height
+  width=$(tmux display-message -p '#{client_width}' 2>/dev/null || echo "")
+  height=$(tmux display-message -p '#{client_height}' 2>/dev/null || echo "")
+  if [[ -n "$width" && -n "$height" ]]; then
+    echo "${width}x${height}"
+  else
+    echo ""
+  fi
 }
 
-# Get client width for a specific session
+# Get client dimensions for a specific session (WxH format)
 # Args: session_name client_data
-get_session_width() {
+get_session_size() {
   local session_name="$1"
   local client_data="$2"
   local current_session
@@ -118,9 +161,16 @@ get_session_width() {
   current_session=$(get_current_session)
 
   if [[ "$session_name" = "$current_session" ]]; then
-    get_current_client_width
+    get_current_client_size
   else
-    echo "$client_data" | grep "^$session_name " | head -1 | cut -d' ' -f2 || echo "-"
+    local width height
+    width=$(echo "$client_data" | grep "^$session_name " | head -1 | awk '{print $2}')
+    height=$(echo "$client_data" | grep "^$session_name " | head -1 | awk '{print $3}')
+    if [[ -n "$width" && -n "$height" ]]; then
+      echo "${width}x${height}"
+    else
+      echo "-"
+    fi
   fi
 }
 

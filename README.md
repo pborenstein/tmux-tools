@@ -48,7 +48,7 @@ tmux-tools help sessions             # Show session commands
 
 | Command | Description | Common Options |
 |---------|-------------|----------------|
-| `status` | Compact table of all sessions (default) | `--show-pid`, `--rename-auto` |
+| `status` | Compact table of all sessions (default) | `--show-pid`, `--show-clients`, `--rename-auto` |
 | `overview` | Tree view of sessions | `--detailed`, `--json`, `-s <session>` |
 | `rename` | Rename sessions/windows | `sessions`, `windows`, `auto` |
 | `config` | Manage configuration | `show`, `create`, `edit` |
@@ -58,7 +58,9 @@ tmux-tools help sessions             # Show session commands
 
 - Tabular display fits more information on screen
 - Smart renaming: cities for sessions, directory names for windows
-- Client width column shows device type (89 = iPad, 142+ = desktop)
+- Client dimensions shown in WxH format (e.g., 172x53)
+- Control mode indicator ('+') for sessions with control mode clients
+- Detailed client view showing TTY, timestamps, and connection info
 - Short `tt` alias for quick access
 - Built-in tmux command reference via `help` command
 - JSON output for scripting
@@ -76,6 +78,11 @@ tmux-tools status
 **See process IDs and paths:**
 ```bash
 tmux-tools status --show-pid
+```
+
+**View client connections:**
+```bash
+tmux-tools status --show-clients
 ```
 
 **Tree view with details:**
@@ -109,9 +116,9 @@ tt help panes                       # Show pane commands (using short alias)
 ```
 TMUX STATUS Sun Nov  9 00:08:00 EST 2025
 
-  session       win  name                  p  cmd      w
-- -------       ---  --------------------  -  -------  ---
-• oslo          0    tmux-tools            0  bash     172
+  session       win  name                  p  cmd      size       c
+- -------       ---  --------------------  -  -------  ---------  -
+• oslo          0    tmux-tools            0  bash     172x53
                 1    apantli               0  fish
                 2    apantli               0  bash
                 3    docs                  0  fish
@@ -126,6 +133,17 @@ TMUX STATUS Sun Nov  9 00:08:00 EST 2025
                 apantli
                 docs
 ○ rio         • home
+```
+
+**Client view:**
+```
+TMUX CLIENTS Mon Nov 10 23:53:44 EST 2025
+
+session       tty            created  activity  size      ctrl  user
+-------       -----------    -------  --------  --------  ----  ----
+lima          -              -        -         -   x-          philip
+oslo          ttys006        07:53    07:53       74x41         philip
+rio           ttys011        23:49    23:53      172x53         philip
 ```
 
 ## Configuration

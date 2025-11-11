@@ -40,7 +40,7 @@ pad_colored() {
 }
 
 # Print formatted table row for tmux-status display
-# Args: attachment_indicator session_display win_index window_display pane_index cmd width_display [pid] [path]
+# Args: attachment_indicator session_display win_index window_display pane_index cmd width_display control_mode_display [pid] [path]
 print_status_row() {
   local attachment_indicator="$1"
   local session_display="$2"
@@ -49,8 +49,9 @@ print_status_row() {
   local pane_index="$5"
   local cmd="$6"
   local width_display="$7"
-  local pid="$8"
-  local path="$9"
+  local control_mode_display="$8"
+  local pid="$9"
+  local path="${10}"
 
   # Determine colors
   local active_color=""
@@ -108,8 +109,12 @@ print_status_row() {
   formatted_row+=$(pad_colored "$cmd" 7 "$info_color" "$reset_color")
   formatted_row+="  "
 
-  # Width display (3 chars)
-  formatted_row+=$(printf "%-3s" "$width_display")
+  # Size display (9 chars for WxH format like "172x53")
+  formatted_row+=$(printf "%-9s" "$width_display")
+  formatted_row+=" "
+
+  # Control mode display (1 char)
+  formatted_row+=$(printf "%-1s" "$control_mode_display")
 
   # Optional PID and path
   if [[ -n "$pid" && -n "$path" ]]; then
@@ -136,11 +141,11 @@ print_status_header() {
   echo
 
   if [[ "$show_pid" = true ]]; then
-    echo "  session       win  name                  p  cmd      w    pid    path"
-    echo "- -------       ---  --------------------  -  -------  ---  -----  ----"
+    echo "  session       win  name                  p  cmd      size       c  pid    path"
+    echo "- -------       ---  --------------------  -  -------  ---------  -  -----  ----"
   else
-    echo "  session       win  name                  p  cmd      w"
-    echo "- -------       ---  --------------------  -  -------  ---"
+    echo "  session       win  name                  p  cmd      size       c"
+    echo "- -------       ---  --------------------  -  -------  ---------  -"
   fi
 }
 
@@ -187,6 +192,24 @@ format_width_display() {
   fi
 }
 
+# Format control mode display (only for new sessions)
+# Args: session_name last_session control_mode
+format_control_mode_display() {
+  local session_name="$1"
+  local last_session="$2"
+  local control_mode="$3"
+
+  if [[ "$session_name" != "$last_session" ]]; then
+    if [[ "$control_mode" == "1" ]]; then
+      echo "+"
+    else
+      echo ""
+    fi
+  else
+    echo ""
+  fi
+}
+
 # Format attachment indicator (only for new sessions)
 # Args: session_name last_session session_attached
 format_attachment_display() {
@@ -220,19 +243,26 @@ needs_session_separator() {
 }
 
 # Print overview row with background coloring
-# Args: bg_color attachment_indicator session_display window_indicator window_display pane_display
+# Args: bg_color attachment_indicator session_display control_mode_indicator window_indicator window_display pane_display
 print_overview_row() {
   local bg_color="$1"
   local attachment_indicator="$2"
   local session_display="$3"
-  local window_indicator="$4"
-  local window_display="$5"
-  local pane_display="$6"
-  local NC="$7"
+  local control_mode_indicator="$4"
+  local window_indicator="$5"
+  local window_display="$6"
+  local pane_display="$7"
+  local NC="$8"
 
   if [[ -n "$session_display" ]]; then
     # First window of session
-    echo -e "${bg_color}${attachment_indicator} $(printf "%-11s" "$session_display") ${window_indicator} $(printf "%-11s" "$window_display")$(printf "%-2s" "$pane_display")${NC}"
+    local session_with_control
+    if [[ -n "$control_mode_indicator" ]]; then
+      session_with_control=$(printf "%-10s%s" "$session_display" "$control_mode_indicator")
+    else
+      session_with_control=$(printf "%-11s" "$session_display")
+    fi
+    echo -e "${bg_color}${attachment_indicator} ${session_with_control} ${window_indicator} $(printf "%-11s" "$window_display")$(printf "%-2s" "$pane_display")${NC}"
   else
     # Additional windows in session
     echo -e "${bg_color}$(printf "%-13s" "") ${window_indicator} $(printf "%-11s" "$window_display")$(printf "%-2s" "$pane_display")${NC}"
@@ -240,22 +270,29 @@ print_overview_row() {
 }
 
 # Print detailed overview row
-# Args: bg_color attachment_indicator session_display window_indicator window_display command path first_window first_pane
+# Args: bg_color attachment_indicator session_display control_mode_indicator window_indicator window_display command path first_window first_pane
 print_detailed_overview_row() {
   local bg_color="$1"
   local attachment_indicator="$2"
   local session_display="$3"
-  local window_indicator="$4"
-  local window_display="$5"
-  local command="$6"
-  local path="$7"
-  local first_window="$8"
-  local first_pane="$9"
-  local NC="${10}"
+  local control_mode_indicator="$4"
+  local window_indicator="$5"
+  local window_display="$6"
+  local command="$7"
+  local path="$8"
+  local first_window="$9"
+  local first_pane="${10}"
+  local NC="${11}"
 
   if [[ "$first_window" = true && "$first_pane" = true ]]; then
     # First pane of first window in session
-    echo -e "${bg_color}${attachment_indicator} $(printf "%-11s" "$session_display") ${window_indicator} $(printf "%-11s" "$window_display") $(printf "%-12s" "$command") ${path}${NC}"
+    local session_with_control
+    if [[ -n "$control_mode_indicator" ]]; then
+      session_with_control=$(printf "%-10s%s" "$session_display" "$control_mode_indicator")
+    else
+      session_with_control=$(printf "%-11s" "$session_display")
+    fi
+    echo -e "${bg_color}${attachment_indicator} ${session_with_control} ${window_indicator} $(printf "%-11s" "$window_display") $(printf "%-12s" "$command") ${path}${NC}"
   elif [[ "$first_pane" = true ]]; then
     # First pane of non-first window
     echo -e "${bg_color}$(printf "%-13s" "") ${window_indicator} $(printf "%-11s" "$window_display") $(printf "%-12s" "$command") ${path}${NC}"
@@ -311,4 +348,94 @@ get_background_color() {
   else
     echo ""
   fi
+}
+
+# Print client info header
+print_client_header() {
+  echo "TMUX CLIENTS $(date)"
+  echo
+  echo "session       tty            created  activity  size      ctrl  user"
+  echo "-------       -----------    -------  --------  --------  ----  ----"
+}
+
+# Print client info row
+# Args: session tty created activity width height control_mode user
+print_client_row() {
+  local session="$1"
+  local tty="$2"
+  local created="$3"
+  local activity="$4"
+  local width="$5"
+  local height="$6"
+  local control_mode="$7"
+  local user="$8"
+
+  # Format TTY (strip /dev/ prefix and truncate)
+  local tty_short="${tty#/dev/}"
+  # Handle empty TTY for control mode clients
+  if [[ -z "$tty_short" ]]; then
+    tty_short="-"
+  fi
+  tty_short=$(printf "%-13s" "$tty_short")
+
+  # Format dimensions
+  local size=$(printf "%4sx%-4s" "$width" "$height")
+
+  # Format control mode indicator
+  local ctrl_indicator=""
+  if [[ "$control_mode" == "1" ]] || [[ "$width" == "0" ]]; then
+    ctrl_indicator="+"
+  fi
+
+  # Determine colors
+  local session_color=""
+  local info_color=""
+  local gray_color=""
+  local reset_color=""
+
+  if colors_supported; then
+    session_color=$(get_color "session")
+    info_color=$(get_color "info")
+    gray_color=$(get_color "gray")
+    reset_color=$(get_color "reset")
+  fi
+
+  # Build formatted row
+  local formatted_row=""
+
+  # Session (13 chars)
+  if [[ -n "$session_color" ]]; then
+    formatted_row+=$(pad_colored "$session" 13 "$session_color" "$reset_color")
+  else
+    formatted_row+=$(printf "%-13s" "$session")
+  fi
+  formatted_row+=" "
+
+  # TTY (13 chars)
+  formatted_row+="$tty_short  "
+
+  # Created time (7 chars) - plain text, no color
+  formatted_row+=$(printf "%-7s" "$created")
+  formatted_row+="  "
+
+  # Activity time (8 chars)
+  if [[ -n "$info_color" ]]; then
+    formatted_row+=$(pad_colored "$activity" 8 "$info_color" "$reset_color")
+  else
+    formatted_row+=$(printf "%-8s" "$activity")
+  fi
+  formatted_row+="  "
+
+  # Size (9 chars)
+  formatted_row+=$(printf "%-9s" "$size")
+  formatted_row+=" "
+
+  # Control mode (4 chars)
+  formatted_row+=$(printf "%-4s" "$ctrl_indicator")
+  formatted_row+="  "
+
+  # User
+  formatted_row+="$user"
+
+  printf "%b\n" "$formatted_row"
 }

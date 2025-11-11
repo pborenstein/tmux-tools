@@ -103,6 +103,7 @@ no_rename=true  # Default: no renaming
 rename_sessions=false
 rename_windows=false
 show_pid=false
+show_clients=false
 theme_override=""
 
 while [[ $# -gt 0 ]]; do
@@ -122,10 +123,12 @@ OPTIONS:
   --rename-sessions   Rename ALL sessions to random city names
   --rename-windows    Rename all windows to their active pane's directory name
   --show-pid          Show PID and path columns (hidden by default)
+  --show-clients      Show client connection information (TTY, timestamps, size)
 
 EXAMPLES:
   ./tmux-status.sh                    # Show compact status
   ./tmux-status.sh --show-pid         # Show status with PID and path details
+  ./tmux-status.sh --show-clients     # Show all client connections
   ./tmux-status.sh --theme vibrant    # Use vibrant color theme
   ./tmux-status.sh --rename-auto      # Rename sessions to cities, windows to dirs
   ./tmux-status.sh --rename-sessions  # Rename all sessions to city names
@@ -161,6 +164,10 @@ EOF
       ;;
     --show-pid)
       show_pid=true
+      shift
+      ;;
+    --show-clients)
+      show_clients=true
       shift
       ;;
     *)
@@ -296,6 +303,50 @@ if [ "$rename_windows" = true ]; then
   done
 fi
 
+# If show_clients flag is set, display client information and exit
+if [ "$show_clients" = true ]; then
+  # Get all sessions
+  all_sessions=$(get_session_data "#{session_name}")
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to get tmux session list" >&2
+    exit 1
+  fi
+
+  if [ -z "$all_sessions" ]; then
+    echo "No tmux sessions found"
+    exit 0
+  fi
+
+  # Get detailed client data
+  client_info=$(get_detailed_client_data)
+
+  # Print client header
+  print_client_header
+
+  # Process each session
+  echo "$all_sessions" | while read -r session_name; do
+    # Check if this session has any clients
+    session_clients=$(echo "$client_info" | grep "^[^|]*|[^|]*|${session_name}|")
+
+    if [ -n "$session_clients" ]; then
+      # Session has clients, display them
+      echo "$session_clients" | while IFS='|' read -r tty pid session termname created activity width height user control_mode; do
+        # Format timestamps
+        created_time=$(format_time_hhmm "$created")
+        activity_time=$(format_time_hhmm "$activity")
+
+        # Print client row
+        print_client_row "$session" "$tty" "$created_time" "$activity_time" "$width" "$height" "$control_mode" "$user"
+      done
+    else
+      # Session has no clients, show as detached
+      print_client_row "$session_name" "" "-" "-" "-" "-" "0" "$USER"
+    fi
+  done
+
+  exit 0
+fi
+
 # Print header
 print_status_header "$show_pid"
 
@@ -343,14 +394,21 @@ echo "$pane_data" | while read -r session win_index win_name pane_index pid cmd 
     attachment_indicator=$(format_attachment_display "$session" "$last_session" "$session_attached")
   fi
 
-  # Get client width for this session (only show on first line of session)
-  width_display=$(format_width_display "$session" "$last_session" "$(get_session_width "$session" "$client_data")")
+  # Get client size for this session (only show on first line of session)
+  width_display=$(format_width_display "$session" "$last_session" "$(get_session_size "$session" "$client_data")")
+
+  # Get control mode status for this session (only show on first line of session)
+  control_mode_display=""
+  if [ "$session" != "$last_session" ]; then
+    control_mode_status=$(get_session_control_mode "$session")
+    control_mode_display=$(format_control_mode_display "$session" "$last_session" "$control_mode_status")
+  fi
 
   # Print output based on show_pid flag
   if [ "$show_pid" = true ]; then
-    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$pid" "$path"
+    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$control_mode_display" "$pid" "$path"
   else
-    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display"
+    print_status_row "$attachment_indicator" "$session_display" "$win_index" "$window_display" "$pane_index" "$cmd" "$width_display" "$control_mode_display"
   fi
 
   last_session="$session"

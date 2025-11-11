@@ -230,6 +230,14 @@ output_summary() {
     local status_indicator
     status_indicator=$(get_session_indicator "$session_attached")
 
+    # Get control mode status for this session
+    local control_mode_status
+    control_mode_status=$(get_session_control_mode "$session_name")
+    local control_mode_indicator=""
+    if [[ "$control_mode_status" == "1" ]]; then
+      control_mode_indicator="+"
+    fi
+
     # Determine background color (alternate sessions)
     local bg_color
     bg_color=$(get_background_color "$session_count" "$(get_color "background")")
@@ -248,9 +256,9 @@ output_summary() {
 
       if [[ "$first_window" = true ]]; then
         first_window=false
-        print_overview_row "$bg_color" "$status_indicator" "$session_name" "$window_indicator" "$win_name" "$pane_display" "$(get_color "reset")"
+        print_overview_row "$bg_color" "$status_indicator" "$session_name" "$control_mode_indicator" "$window_indicator" "$win_name" "$pane_display" "$(get_color "reset")"
       else
-        print_overview_row "$bg_color" "$status_indicator" "" "$window_indicator" "$win_name" "$pane_display" "$(get_color "reset")"
+        print_overview_row "$bg_color" "$status_indicator" "" "" "$window_indicator" "$win_name" "$pane_display" "$(get_color "reset")"
       fi
     done <<< "$windows_data"
   done <<< "$sessions_data"
@@ -277,6 +285,14 @@ output_detailed() {
     local status_indicator
     status_indicator=$(get_session_indicator "$session_attached")
 
+    # Get control mode status for this session
+    local control_mode_status
+    control_mode_status=$(get_session_control_mode "$session_name")
+    local control_mode_indicator=""
+    if [[ "$control_mode_status" == "1" ]]; then
+      control_mode_indicator="+"
+    fi
+
     # Determine background color (alternate sessions)
     local bg_color
     bg_color=$(get_background_color "$session_count" "$(get_color "background")")
@@ -296,7 +312,7 @@ output_detailed() {
         [[ "$pane_session" != "$session_name" ]] && continue
         [[ "$pane_window" != "$win_index" ]] && continue
 
-        print_detailed_overview_row "$bg_color" "$status_indicator" "$session_name" "$window_indicator" "$win_name" "$pane_command" "$pane_path" "$first_window" "$first_pane" "$(get_color "reset")"
+        print_detailed_overview_row "$bg_color" "$status_indicator" "$session_name" "$control_mode_indicator" "$window_indicator" "$win_name" "$pane_command" "$pane_path" "$first_window" "$first_pane" "$(get_color "reset")"
 
         if [[ "$first_window" = true ]]; then
           first_window=false
