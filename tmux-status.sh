@@ -394,8 +394,8 @@ echo "$pane_data" | while read -r session win_index win_name pane_index pid cmd 
     attachment_indicator=$(format_attachment_display "$session" "$last_session" "$session_attached")
   fi
 
-  # Get client width for this session (only show on first line of session)
-  width_display=$(format_width_display "$session" "$last_session" "$(get_session_width "$session" "$client_data")")
+  # Get client size for this session (only show on first line of session)
+  width_display=$(format_width_display "$session" "$last_session" "$(get_session_size "$session" "$client_data")")
 
   # Get control mode status for this session (only show on first line of session)
   control_mode_display=""

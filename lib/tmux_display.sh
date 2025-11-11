@@ -109,9 +109,9 @@ print_status_row() {
   formatted_row+=$(pad_colored "$cmd" 7 "$info_color" "$reset_color")
   formatted_row+="  "
 
-  # Width display (3 chars)
-  formatted_row+=$(printf "%-3s" "$width_display")
-  formatted_row+="  "
+  # Size display (9 chars for WxH format like "172x53")
+  formatted_row+=$(printf "%-9s" "$width_display")
+  formatted_row+=" "
 
   # Control mode display (1 char)
   formatted_row+=$(printf "%-1s" "$control_mode_display")
@@ -141,11 +141,11 @@ print_status_header() {
   echo
 
   if [[ "$show_pid" = true ]]; then
-    echo "  session       win  name                  p  cmd      w    c  pid    path"
-    echo "- -------       ---  --------------------  -  -------  ---  -  -----  ----"
+    echo "  session       win  name                  p  cmd      size       c  pid    path"
+    echo "- -------       ---  --------------------  -  -------  ---------  -  -----  ----"
   else
-    echo "  session       win  name                  p  cmd      w    c"
-    echo "- -------       ---  --------------------  -  -------  ---  -"
+    echo "  session       win  name                  p  cmd      size       c"
+    echo "- -------       ---  --------------------  -  -------  ---------  -"
   fi
 }
 
