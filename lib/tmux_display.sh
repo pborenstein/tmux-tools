@@ -40,7 +40,7 @@ pad_colored() {
 }
 
 # Print formatted table row for tmux-status display
-# Args: attachment_indicator session_display win_index window_display pane_index cmd width_display control_mode_display [pid] [path]
+# Args: attachment_indicator session_display win_index window_display pane_index cmd width_display [pid] [path]
 print_status_row() {
   local attachment_indicator="$1"
   local session_display="$2"
@@ -49,9 +49,8 @@ print_status_row() {
   local pane_index="$5"
   local cmd="$6"
   local width_display="$7"
-  local control_mode_display="$8"
-  local pid="$9"
-  local path="${10}"
+  local pid="$8"
+  local path="$9"
 
   # Determine colors
   local active_color=""
@@ -111,10 +110,6 @@ print_status_row() {
 
   # Size display (9 chars for WxH format like "172x53")
   formatted_row+=$(printf "%-9s" "$width_display")
-  formatted_row+=" "
-
-  # Control mode display (1 char)
-  formatted_row+=$(printf "%-1s" "$control_mode_display")
 
   # Optional PID and path
   if [[ -n "$pid" && -n "$path" ]]; then
@@ -141,11 +136,11 @@ print_status_header() {
   echo
 
   if [[ "$show_pid" = true ]]; then
-    echo "  session       win  name                  p  cmd      size       c  pid    path"
-    echo "- -------       ---  --------------------  -  -------  ---------  -  -----  ----"
+    echo "  session       win  name                  p  cmd      size       pid    path"
+    echo "- -------       ---  --------------------  -  -------  ---------  -----  ----"
   else
-    echo "  session       win  name                  p  cmd      size       c"
-    echo "- -------       ---  --------------------  -  -------  ---------  -"
+    echo "  session       win  name                  p  cmd      size      "
+    echo "- -------       ---  --------------------  -  -------  ---------"
   fi
 }
 
@@ -192,37 +187,28 @@ format_width_display() {
   fi
 }
 
-# Format control mode display (only for new sessions)
-# Args: session_name last_session control_mode
-format_control_mode_display() {
-  local session_name="$1"
-  local last_session="$2"
-  local control_mode="$3"
-
-  if [[ "$session_name" != "$last_session" ]]; then
-    if [[ "$control_mode" == "1" ]]; then
-      echo "+"
-    else
-      echo ""
-    fi
-  else
-    echo ""
-  fi
-}
-
 # Format attachment indicator (only for new sessions)
-# Args: session_name last_session session_attached
+# Args: session_name last_session session_attached control_mode
 format_attachment_display() {
   local session_name="$1"
   local last_session="$2"
   local session_attached="$3"
+  local control_mode="$4"
 
   if [[ "$session_name" != "$last_session" ]]; then
+    local indicator
     case $session_attached in
-      0) echo " " ;;
-      1) echo "•" ;;
-      *) echo "$session_attached" ;;
+      0) indicator=" " ;;
+      1) indicator="•" ;;
+      *) indicator="$session_attached" ;;
     esac
+
+    # Underline if control mode is active
+    if [[ "$control_mode" == "1" && "$indicator" != " " ]]; then
+      echo -e "\033[4m${indicator}\033[24m"
+    else
+      echo "$indicator"
+    fi
   else
     echo ""
   fi

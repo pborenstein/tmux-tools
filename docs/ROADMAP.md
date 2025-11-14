@@ -2,8 +2,13 @@
 
 ## Recently Completed
 
+**Control mode indicator redesign**:
+- Removed separate control mode column for more compact display
+- Control mode now indicated by underlining attachment indicator (• or number)
+- Better visual integration while maintaining clear indication
+
 **Client information and control mode (v1.3.0)**:
-- Control mode indicator (`+`) for sessions with control mode clients
+- Control mode detection for sessions with control mode clients
 - `--show-clients` flag to display detailed client connection info
 - Client dimensions in WxH format (e.g., 172x53) instead of just width
 - Shows TTY, timestamps (HH:MM), dimensions, control mode, and user info

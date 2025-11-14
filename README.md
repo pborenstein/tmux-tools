@@ -59,7 +59,7 @@ tmux-tools help sessions             # Show session commands
 - Tabular display fits more information on screen
 - Smart renaming: cities for sessions, directory names for windows
 - Client dimensions shown in WxH format (e.g., 172x53)
-- Control mode indicator ('+') for sessions with control mode clients
+- Control mode indication via underlined attachment indicator
 - Detailed client view showing TTY, timestamps, and connection info
 - Short `tt` alias for quick access
 - Built-in tmux command reference via `help` command
@@ -116,8 +116,8 @@ tt help panes                       # Show pane commands (using short alias)
 ```
 TMUX STATUS Sun Nov  9 00:08:00 EST 2025
 
-  session       win  name                  p  cmd      size       c
-- -------       ---  --------------------  -  -------  ---------  -
+  session       win  name                  p  cmd      size
+- -------       ---  --------------------  -  -------  ---------
 • oslo          0    tmux-tools            0  bash     172x53
                 1    apantli               0  fish
                 2    apantli               0  bash
